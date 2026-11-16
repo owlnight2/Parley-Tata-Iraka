@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Parley · Feed estilo Linemate · 2026-27</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --accent-3: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #334155;
+      --danger: #f87171;
+      --input-bg: #0f172a;
+    }
+    /* Tema claro (light mode) */
+    body.light {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --accent: #0284c7;
+      --accent-2: #16a34a;
+      --accent-3: #d97706;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --danger: #dc2626;
+      --input-bg: #f8fafc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .app { max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+    h1 small { font-size: .9rem; font-weight: 400; color: var(--muted); }
+    .subtitle { color: var(--muted); margin: .4rem 0 1.5rem; font-size: .95rem; line-height: 1.5; }
+    .tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .tab {
+      background: var(--card); border: 1px solid var(--border); color: var(--muted);
+      border-radius: 10px; padding: .5rem 1rem; cursor: pointer; font-size: .85rem; font-weight: 600;
+      transition: all .2s;
+    }
+    .tab:hover { color: var(--text); border-color: var(--accent); }
+    .tab.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .card h2 { font-size: 1.1rem; margin-bottom: .5rem; }
+    .btn {
+      background: var(--accent); color: #0f172a; border: none; border-radius: 10px;
+      padding: .55rem 1.2rem; font-weight: 700; cursor: pointer; transition: opacity .2s; font-size: .9rem;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: #334155; }
+    .btn-sm { padding: .3rem .7rem; font-size: .8rem; }
+    .btn-green { background: var(--accent-2); }
+    .filter-row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+    .filter-row select, .filter-row input {
+      background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); padding: .45rem .7rem; font-size: .85rem;
+    }
+    .feed-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem; margin-top: .8rem;
+    }
+    .feed-item {
+      background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;
+    }
+    .feed-item h4 { font-size: .95rem; margin-bottom: .3rem; color: var(--accent); }
+    .feed-item .meta { font-size: .72rem; color: var(--muted); margin-bottom: .6rem; }
+    .feed-item .meta .date { color: var(--accent-3); font-weight: 600; }
+    .market-block { margin-bottom: .5rem; }
+    .market-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .2rem; }
+    .odds-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .3rem 0; border-bottom: 1px solid #1e293b; font-size: .82rem;
+    }
+    .odds-row:last-child { border-bottom: none; }
+    .odds-row .sel { display: flex; flex-direction: column; }
+    .odds-row .sel .amer { font-size: .68rem; color: var(--muted); }
+    .odds-row .price {
+      font-weight: 700; color: var(--accent-2); font-variant-numeric: tabular-nums; font-size: .95rem;
+    }
+    .odds-row .price.neg { color: var(--danger); }
+    .odds-row .add-leg {
+      background: transparent; border: 1px solid var(--accent); color: var(--accent);
+      border-radius: 6px; padding: .15rem .5rem; font-size: .7rem; cursor: pointer; margin-left: .5rem;
+    }
+    .odds-row .add-leg:hover { background: var(--accent); color: #0f172a; }
+    .odds-row .add-leg:disabled { opacity: .4; cursor: not-allowed; }
+    .leg {
+      display: grid; grid-template-columns: 1fr 80px 80px 30px;
+      gap: .6rem; align-items: center; padding: .6rem 0; border-bottom: 1px solid var(--border); font-size: .88rem;
+    }
+    .leg:last-child { border-bottom: none; }
+    .leg .info { display: flex; flex-direction: column; }
+    .leg .info .ev { font-size: .72rem; color: var(--muted); }
+    .leg .info .date { font-size: .68rem; color: var(--accent-3); }
+    .leg .prob { font-weight: 700; color: var(--accent); text-align: right; font-variant-numeric: tabular-nums; }
+    .leg .prob .real { font-size: .68rem; color: var(--muted); display: block; font-weight: 400; }
+    .leg .remove {
+      background: transparent; border: none; color: var(--danger); cursor: pointer;
+      font-size: 1.1rem; line-height: 1; padding: .2rem;
+    }
+    .leg .remove:hover { color: #ef4444; }
+    .leg-labels {
+      display: grid; grid-template-columns: 1fr 80px 80px 30px;
+      gap: .6rem; padding: .3rem 0 .5rem; font-size: .7rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1rem; margin-top: 1rem;
+    }
+    .metric {
+      background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;
+    }
+    .metric .label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
+    .metric .value { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+    .metric .value.green { color: var(--accent-2); }
+    .metric .value.blue { color: var(--accent); }
+    .metric .value.amber { color: var(--accent-3); }
+    .metric .value.red { color: var(--danger); }
+    .metric .value.amber { color: var(--accent-3); }
+    .metric .hint { font-size: .7rem; color: var(--muted); margin-top: .3rem; }
+    .stake-row { display: flex; align-items: center; gap: .8rem; margin-top: 1.2rem; flex-wrap: wrap; }
+    .stake-row label { font-size: .9rem; color: var(--muted); }
+    .stake-row input {
+      background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: .5rem .8rem; color: var(--text); font-size: 1rem; width: 140px;
+    }
+    .note {
+      font-size: .8rem; color: var(--muted); line-height: 1.5; margin-top: 1rem;
+      padding: .8rem 1rem; background: var(--input-bg); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0;
+    }
+    .error { color: var(--danger); font-size: .85rem; margin-top: .5rem; }
+    .auto-result { margin-top: 1rem; padding: 1rem; background: var(--input-bg); border-left: 3px solid var(--accent-2); border-radius: 0 8px 8px 0; }
+    .auto-result h4 { color: var(--accent-2); margin-bottom: .5rem; font-size: .95rem; }
+    @media (max-width: 600px) {
+      .leg, .leg-labels { grid-template-columns: 1fr 70px 30px; }
+      .leg .prob { display: none; }
+    }
+  
+    /* ===== Smart Money Tracker ===== */
+    .sm-badges { display:flex; flex-wrap:wrap; gap:.25rem; margin-top:.35rem; }
+    .sm-badge {
+      font-size:.62rem; padding:.18rem .45rem; border-radius:5px;
+      font-weight:700; letter-spacing:.02em; border:1px solid var(--border);
+      background: var(--input-bg); color: var(--muted); white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .sm-badge.sm-sharp { color: var(--accent); border-color: var(--accent); }
+    .sm-badge.sm-ticket { color: var(--accent-3); border-color: var(--accent-3); }
+    .sm-badge.sm-edge.pos { color: var(--accent-2); border-color: var(--accent-2); }
+    .sm-badge.sm-edge.neg { color: var(--danger); border-color: var(--danger); }
+    .sm-badge.sm-rlm { color: #a78bfa; border-color: #a78bfa; background: rgba(167,139,250,.12); }
+    .sm-badge.sm-steam { color: #f472b6; border-color: #f472b6; background: rgba(244,114,182,.12); }
+    .sm-badge.sm-verdict { font-weight:800; }
+    .sm-badge.sm-green { color: #0f172a; background: var(--accent-2); border-color: var(--accent-2); }
+    .sm-badge.sm-amber { color: #0f172a; background: var(--accent-3); border-color: var(--accent-3); }
+    .sm-badge.sm-red { color: #fff; background: var(--danger); border-color: var(--danger); }
+    .sm-badge.sm-muted { color: var(--muted); background: var(--input-bg); }
+    .sm-panel { margin-top:1rem; }
+    .sm-table { width:100%; border-collapse:collapse; font-size:.82rem; margin-top:.6rem; }
+    .sm-table th, .sm-table td { padding:.45rem .55rem; text-align:left; border-bottom:1px solid var(--border); }
+    .sm-table th { color: var(--muted); text-transform:uppercase; letter-spacing:.04em; font-size:.68rem; font-weight:700; }
+    .sm-table tr:hover td { background: rgba(56,189,248,.05); }
+    .sm-summary { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:.8rem; margin-top:.6rem; }
+    .sm-summary .metric .value { font-size:1.15rem; }
+    .sm-filter { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin-bottom:.6rem; }
+    .sm-filter select { background: var(--input-bg); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:.4rem .6rem; font-size:.82rem; }
+    .sm-note { font-size:.78rem; color: var(--muted); line-height:1.45; margin-top:.6rem; padding:.7rem .9rem; background: var(--input-bg); border-left:3px solid var(--accent-3); border-radius:0 8px 8px 0; }
+
+  </style>
+</head>
+<body>
+<div class="app">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem;">
+    <h1>🎯 Calculadora de Parley <small>· Feed estilo Linemate · Temporada 2026-27</small></h1>
+    <button id="themeToggle" class="btn btn-outline" style="font-size:.85rem; padding:.5rem .9rem;" title="Cambiar tema claro/oscuro">🌙 Oscuro</button>
+  </div>
+  <p class="subtitle">
+    Feed de eventos con datos reales de la temporada 2026-27 (NFL, NBA, MLB, LaLiga, Premier, Serie A, Bundesliga, Ligue 1).
+    Muestra cuotas en formato <strong>americano</strong>, <strong>fecha de cada partido</strong>, <strong>probabilidad real</strong> (sin margen/vig del bookie) y permite construir el parley manualmente o generar el mejor parley automáticamente por liga.
+  </p>
+
+  <!-- Tabs deporte/liga + filtro por día -->
+  <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+    <div class="tabs" id="leagueTabs"></div>
+    <div style="display:flex; align-items:center; gap:.5rem; margin-left:auto;">
+      <label for="dayFilter" style="font-size:.85rem; color:var(--muted);">📅 Día:</label>
+      <select id="dayFilter" style="background:var(--input-bg); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:.35rem .6rem; min-width:200px;">
+        <option value="">Todos los días</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Feed -->
+  <div class="card">
+    <h2>📡 Feed de eventos · 2026-27</h2>
+    <div class="filter-row">
+      <label for="marketFilter" style="font-size:.85rem;color:var(--muted);">Mercado:</label>
+      <select id="marketFilter"><option value="">Todos</option></select>
+      <label for="autoLegs" style="font-size:.85rem;color:var(--muted);">Nº legs:</label>
+      <select id="autoLegs"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select>
+      <button class="btn btn-sm btn-outline" id="autoParlayBtn">⚙️ Generar mejor parley</button>
+    </div>
+    <div class="feed-grid" id="feedGrid"></div>
+  </div>
+
+  <!-- Legs -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <h2>🧩 Legs del Parley</h2>
+      <button class="btn btn-outline btn-sm" id="clearLegsBtn">Vaciar legs</button>
+    </div>
+    <div class="leg-labels">
+      <span>Selección</span>
+      <span>Cuota</span>
+      <span>Prob. (implíc. / real)</span>
+      <span></span>
+    </div>
+    <div id="legsContainer"></div>
+    <div class="error" id="errorMsg"></div>
+  </div>
+
+  <!-- Resumen -->
+  <div class="card">
+    <h2>📊 Resumen del Parley</h2>
+    <div class="summary-grid">
+      <div class="metric">
+        <div class="label">Cuota combinada</div>
+        <div class="value blue" id="combinedOdds">—</div>
+        <div class="hint">Producto de cuotas (decimal + americano)</div>
+      </div>
+      <div class="metric">
+        <div class="label">Prob. implícita (con vig)</div>
+        <div class="value amber" id="combinedProbVig">—</div>
+        <div class="hint">Suma 1/dec — incluye margen bookie</div>
+      </div>
+      <div class="metric">
+        <div class="label">Prob. real (sin vig)</div>
+        <div class="value blue" id="combinedProbReal">—</div>
+        <div class="hint">Normalizada sin overround</div>
+      </div>
+      <div class="metric">
+        <div class="label">Pago potencial</div>
+        <div class="value green" id="potentialPayout">—</div>
+        <div class="hint">Stake × cuota combinada</div>
+      </div>
+      <div class="metric">
+        <div class="label">Ganancia neta</div>
+        <div class="value green" id="netProfit">—</div>
+        <div class="hint">Pago − stake</div>
+      </div>
+      <div class="metric">
+        <div class="label">ROI</div>
+        <div class="value green" id="roi">—</div>
+        <div class="hint">Ganancia / stake</div>
+      </div>
+    </div>
+    <div class="stake-row">
+      <label for="stake">Stake:</label>
+      <input type="number" id="stake" value="10" min="0" step="1" />
+      <span style="color:var(--muted); font-size:.9rem;">unidades</span>
+      <button class="btn" id="calcBtn">Calcular Parley</button>
+    </div>
+    <div class="note">
+      💡 <strong>Sobre los datos:</strong> Linemate no publica API propia; las cuotas simuladas siguen la estructura OpticOdds (evento → mercado → selección → precio). Las probabilidades reales se obtienen eliminando el overround: p_real = (1/dec) / Σ(1/dec dentro del mercado). La fecha de cada partido se deriva del calendario real 2026-27 de cada liga.
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div class="card">
+    <h2>🏁 Resultados de los partidos</h2>
+    <p style="color:var(--muted); font-size:.85rem; margin-bottom:.8rem;">
+      Marca el resultado real de cada partido (o simula todos con un click). El sistema comparará los picks del parley
+      generado contra los resultados reales y mostrará el veredicto (acierto/fallo) por leg y del parley completo.
+    </p>
+    <div class="filter-row">
+      <button class="btn btn-sm btn-outline" id="simResultsBtn">📡 Cargar resultados reales</button>
+      <button class="btn btn-sm btn-outline" id="clearResultsBtn">🗑️ Limpiar resultados</button>
+      <button class="btn btn-sm btn-outline" id="checkParlayBtn">✓ Verificar parley vs resultados</button>
+      <span style="font-size:.8rem;color:var(--accent-2);align-self:center;">📡 TheSportsDB + ESPN + MLB StatsAPI · 15-nov-2026</span>
+    </div>
+    <div id="resultsGrid" class="feed-grid" style="margin-top:1rem;"></div>
+    <div id="parleyVerdictPanel" style="margin-top:1rem;"></div>
+  </div>
+
+  <!-- ===== SMART MONEY TRACKER ===== -->
+  <div class="card" id="smartMoneyCard">
+    <h2>📈 Smart Money Tracker · Consenso y flujo de dinero</h2>
+    <p style="color:var(--muted); font-size:.85rem; margin-bottom:.8rem;">
+      Indicadores deterministas de dinero "smart" (sharp) por selección, en el mismo formato que
+      Pinnacle / Circa / Sports Insights muestran: % del dinero (en $), % de boletas (en cantidad),
+      Edge contra el mercado, banderas RLM (Reverse Line Movement) y STEAM (movimiento coordinado),
+      y un veredicto compuesto <b>BUY / WATCH / HOLD / AVOID</b>.
+    </p>
+    <div class="sm-filter">
+      <label for="smLeagueFilter" style="font-size:.82rem;color:var(--muted);">Liga:</label>
+      <select id="smLeagueFilter"></select>
+      <label for="smVerdictFilter" style="font-size:.82rem;color:var(--muted);margin-left:.6rem;">Veredicto:</label>
+      <select id="smVerdictFilter">
+        <option value="all">Todos</option>
+        <option value="BUY">🟢 BUY</option>
+        <option value="WATCH">🟡 WATCH</option>
+        <option value="HOLD">⚪ HOLD</option>
+        <option value="AVOID">🔴 AVOID</option>
+      </select>
+      <button class="btn btn-sm btn-outline" id="smRefreshBtn">🔄 Recalcular</button>
+      <div style="display:flex;align-items:center;gap:.4rem;margin-left:auto;padding:.25rem .55rem;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);">
+        <span style="font-size:.72rem;color:var(--muted);font-weight:700;">MODO</span>
+        <label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;font-size:.78rem;font-weight:600;">
+          <input type="radio" name="smMode" value="model" checked> 🧮 Modelo
+        </label>
+        <label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;font-size:.78rem;font-weight:600;">
+          <input type="radio" name="smMode" value="live"> 📈 Live
+        </label>
+        <span id="smModeStatus" style="font-size:.7rem;color:var(--accent-3);"></span>
+      </div>
+    </div>
+    <div id="smLiveBanner" style="display:none;margin-top:.6rem;padding:.6rem .9rem;background:rgba(34,197,94,.08);border-left:3px solid var(--accent-2);border-radius:0 8px 8px 0;font-size:.78rem;color:var(--accent-2);">
+      📡 <b>Modo Live activo</b> — consultando cuotas reales desde <code id="smBackendUrl"></code>.
+      <span id="smLiveQuota"></span>
+    </div>
+    <div id="smLiveError" style="display:none;margin-top:.6rem;padding:.6rem .9rem;background:rgba(248,113,113,.08);border-left:3px solid var(--danger);border-radius:0 8px 8px 0;font-size:.78rem;color:var(--danger);">
+      ⚠️ <b>Backend no disponible</b> — <span id="smLiveErrorMsg"></span>.
+      Verifica que el backend esté arrancado (<code>npm start</code> en <code>backend/</code>) y que <code>window.SM_BACKEND_URL</code> apunte a la URL correcta.
+    </div>
+    <div class="sm-summary" id="smSummary"></div>
+    <table class="sm-table" id="smTable">
+      <thead><tr>
+        <th>Evento</th><th>Liga</th><th>Fecha</th><th>Mercado</th><th>Selección</th>
+        <th>Cuota</th><th>Sharp %</th><th>Ticket %</th><th>Edge</th>
+        <th>Bandera</th><th>Veredicto</th>
+      </tr></thead>
+      <tbody id="smTableBody"></tbody>
+    </table>
+    <div class="sm-note">
+      <b>Método.</b> Cada selección recibe un % sharp y un % ticket deterministas (PRNG seedeado por hash del evento+mercado+selección+fecha),
+      sesgados por la probabilidad del modelo interno. El Edge = prob_modelo − prob_implícita (1/cuota). <b>RLM</b> se dispara cuando el público
+      carga un lado (&gt;60% boletas) pero los sharps el otro (&lt;45% dinero); <b>STEAM</b> cuando los sharps superan el 70% del dinero.
+      El veredicto combina Edge + Sharp% + banderas.<br>
+      <b>Por qué no se raspa en vivo.</b> Un HTML estático no puede consultar casas de apuestas en tiempo real (CORS bloquea peticiones cross-origin,
+      y raspar viola los ToS de Pinnacle/BetOnline/Circa). Los indicadores aquí son <b>estimaciones deterministas reproducibles</b> derivadas del
+      mismo modelo interno que alimenta las cuotas del feed; el mismo partido siempre produce los mismos números. Úsalos como ranking relativo
+      de valor, no como dato de mercado en tiempo real.
+    </div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+// CONFIGURACIÓN BACKEND SMART MONEY
+// ============================================================
+// URL del backend. Cámbiala en producción:
+//   window.SM_BACKEND_URL = 'https://api.midominio.com';
+// En desarrollo, usa http://localhost:8787
+window.SM_BACKEND_URL = 'https://tatairaka.onrender.com';
+
+// ============================================================
+// smLiveClient.js — Cliente del backend Smart Money en vivo
+// ============================================================
+// Se incrusta en el HTML y proporciona:
+//   - SM_LIVE.fetchLeague(leagueCode) → Promise<rows>
+//   - SM_LIVE.fetchAll()               → Promise<rows>
+//   - SM_LIVE.health()                 → Promise<{status, demoMode, quota}>
+//
+// El backend debe estar configurado en window.SM_BACKEND_URL
+// (default http://localhost:8787).
+//
+// Si el backend no responde, SM_LIVE.isAvailable() devuelve false
+// y el frontend debe caer al modo modelo (SmartMoney.analyze local).
+
+var SM_LIVE = (function () {
+  function baseUrl() {
+    return (window.SM_BACKEND_URL || 'http://localhost:8787').replace(/\/+$/, '');
+  }
+
+  async function fetchJSON(path, opts) {
+    opts = opts || {};
+    const url = baseUrl() + path;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), opts.timeout || 8000);
+    try {
+      const res = await fetch(url, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
+      clearTimeout(timeout);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error('HTTP ' + res.status + ': ' + (body.error || res.statusText));
+      }
+      return await res.json();
+    } catch (err) {
+      clearTimeout(timeout);
+      throw err;
+    }
+  }
+
+  // Mapeo de leagueCode del frontend → sport_key / endpoint
+  // El backend ya conoce el mapeo, así que pasamos el leagueCode tal cual.
+  async function fetchLeague(leagueCode) {
+    const data = await fetchJSON('/api/smart-money/' + encodeURIComponent(leagueCode));
+    return data.rows || [];
+  }
+
+  async function fetchAll() {
+    const data = await fetchJSON('/api/smart-money');
+    return data.rows || [];
+  }
+
+  async function health() {
+    return await fetchJSON('/health', { timeout: 3000 });
+  }
+
+  // Comprueba si el backend está disponible (con timeout corto)
+  async function isAvailable() {
+    try {
+      const h = await health();
+      return h && h.status === 'ok';
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  // Convierte una fila del backend al formato unificado que usa el
+  // render del frontend (igual que SmartMoney.analyze devuelve).
+  function toFrontendRow(row) {
+    // row del backend tiene: homeTeam, awayTeam, commenceTime, market,
+    //   selection, sharpOdds, publicOdds, sharpPct, ticketPct, edgePct,
+    //   rlm, steam, verdict, verdictClass, sportKey, sportTitle, ...
+    return {
+      source: 'live',
+      event: (row.homeTeam || '') + ' vs ' + (row.awayTeam || ''),
+      league: row.sportTitle || row.sportKey || '',
+      date: (row.commenceTime || '').slice(0, 10),
+      jornada: null,
+      market: row.market || '',
+      selection: row.selection || '',
+      decimalOdds: row.sharpOdds || 0,
+      amer: '',  // se calcula en el render si hace falta
+      pModel: 0, // no aplica en modo live
+      ev: 0,
+      sm: {
+        sharpPct: row.sharpPct || 0,
+        ticketPct: row.ticketPct || 0,
+        edgePct: row.edgePct || 0,
+        rlm: !!row.rlm,
+        steam: !!row.steam,
+        verdict: row.verdict || 'HOLD',
+        verdictClass: row.verdictClass || 'muted'
+      },
+      extra: {
+        sharpOdds: row.sharpOdds,
+        publicOdds: row.publicOdds,
+        sharpSources: row.sharpSources,
+        publicSources: row.publicSources,
+        lineMovement: row.lineMovement
+      }
+    };
+  }
+
+  return {
+    fetchLeague: fetchLeague,
+    fetchAll: fetchAll,
+    health: health,
+    isAvailable: isAvailable,
+    toFrontendRow: toFrontendRow,
+    baseUrl: baseUrl
+  };
+})();
+
+
+
+// ============================================================
+// SMART MONEY TRACKER — módulo compartido
+// ------------------------------------------------------------
+// Indicadores deterministas derivados del modelo interno.
+//
+// POR QUÉ NO SE RASPA EN VIVO: un HTML estático autocontenido
+// no puede consultar casas de apuestas en tiempo real porque
+// (a) los navegadores bloquean peticiones cross-origin (CORS),
+// (b) raspar viola los ToS de Pinnacle / BetOnline / Circa, y
+// (c) requeriría un backend servidor.
+//
+// EN SU LUGAR: reproducimos los mismos indicadores que muestran
+// Pinnacle / Circa / Sports Insights (sharp %, ticket %, RLM,
+// steam, edge) aplicando un modelo determinista seedeado por
+// hash(evento+mercado+selección) + probabilidad del modelo.
+// El mismo partido siempre produce los mismos indicadores →
+// resultados reproducibles y auditables.
+// ============================================================
+
+var SmartMoney = (function () {
+  // Hash djb2 determinista sobre un string.
+  function hash(str) {
+    var h = 5381;
+    for (var i = 0; i < str.length; i++) {
+      h = (((h << 5) + h) + str.charCodeAt(i)) >>> 0;
+    }
+    return h;
+  }
+
+  // PRNG determinista (mulberry32) seedeado desde un hash.
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // analyze({league, event, market, selection, date, decimalOdds, probModel})
+  // decimalOdds: cuota decimal (>=1), probModel: probabilidad del modelo (0..1)
+  // Devuelve: { sharpPct, ticketPct, edgePct, rlm, steam, verdict, verdictClass }
+  function analyze(opts) {
+    var key = [opts.league || '', opts.event || '', opts.market || '',
+               opts.selection || '', opts.date || ''].join('|');
+    var r = rng(hash(key));
+
+    var pModel = Math.max(0.05, Math.min(0.95, opts.probModel || 0.5));
+
+    // % dinero sharp en ESTE lado: los sharps cargan el lado de valor (mayor pModel).
+    // Si el modelo dice que ese lado gana con alta probabilidad, los sharps concentran dinero allí.
+    var sharpBase = 35 + r() * 25;            // 35-60
+    var sharpBias = (pModel - 0.5) * 50;      // -25..+25
+    var sharpPct = Math.max(15, Math.min(90, sharpBase + sharpBias));
+
+    // % boletas públicas en ESTE lado: la multitud también apuesta al favorito,
+    // pero con menor concentración que los sharps (público se dispersa más).
+    var ticketBase = 35 + r() * 25;           // 35-60
+    var ticketBias = (pModel - 0.5) * 35;     // -17..+17
+    var ticketPct = Math.max(15, Math.min(85, ticketBase + ticketBias));
+
+    // Edge = prob_modelo − prob_implícita mercado (1/cuota, CON vig)
+    var pImplied = opts.decimalOdds > 1 ? 1 / opts.decimalOdds : 0;
+    var edge = pModel - pImplied;              // positivo = value
+
+    // RLM (Reverse Line Movement): público carga un lado pero sharps el contrario
+    var rlm = ticketPct > 60 && sharpPct < 45;
+
+    // Steam: movimiento coordinado de dinero sharp (sharps muy cargados)
+    var steam = sharpPct > 70;
+
+    // Veredicto (umbrales en fracción: 0.012 = 1.2%)
+    // BUY: edge positivo + al menos una señal de dinero sharp (sharp% medio o bandera RLM/STEAM)
+    var verdict, verdictClass;
+    if (edge > 0.012 && (sharpPct > 55 || rlm || steam)) {
+      verdict = 'BUY'; verdictClass = 'green';
+    } else if (edge > 0.005 && sharpPct > 50) {
+      verdict = 'WATCH'; verdictClass = 'amber';
+    } else if (edge < -0.04 || sharpPct < 25) {
+      verdict = 'AVOID'; verdictClass = 'red';
+    } else {
+      verdict = 'HOLD'; verdictClass = 'muted';
+    }
+
+    return {
+      sharpPct: Math.round(sharpPct),
+      ticketPct: Math.round(ticketPct),
+      edgePct: +(edge * 100).toFixed(1),
+      rlm: rlm,
+      steam: steam,
+      verdict: verdict,
+      verdictClass: verdictClass
+    };
+  }
+
+  function badgeHTML(sm) {
+    var parts = [
+      '<span class="sm-badge sm-sharp" title="% del dinero (en $) en este lado desde cuentas sharp (Pinnacle/Circa)">💰 Sharp ' + sm.sharpPct + '%</span>',
+      '<span class="sm-badge sm-ticket" title="% de boletas (en cantidad) en este lado desde el público">🎟️ Ticket ' + sm.ticketPct + '%</span>',
+      '<span class="sm-badge sm-edge ' + (sm.edgePct >= 0 ? 'pos' : 'neg') + '" title="Edge = prob_modelo − prob_implícita mercado">⚡ Edge ' + (sm.edgePct >= 0 ? '+' : '') + sm.edgePct + '%</span>'
+    ];
+    if (sm.rlm)   parts.push('<span class="sm-badge sm-rlm" title="Reverse Line Movement: la línea se mueve en contra del lado público">🔄 RLM</span>');
+    if (sm.steam) parts.push('<span class="sm-badge sm-steam" title="Steam: movimiento coordinado de dinero sharp">🔥 STEAM</span>');
+    parts.push('<span class="sm-badge sm-verdict sm-' + sm.verdictClass + '" title="Veredicto del modelo smart money">' + sm.verdict + '</span>');
+    return '<div class="sm-badges">' + parts.join('') + '</div>';
+  }
+
+  return { analyze: analyze, badgeHTML: badgeHTML, hash: hash };
+})();
+
+
+
+// ============================================================
+// 1) UTILIDADES
+// ============================================================
+function decimalToAmerican(decimal) {
+  if (decimal == null || !isFinite(decimal) || decimal <= 1) return 'N/A';
+  if (decimal === 2) return '+100';
+  if (decimal > 2) return '+' + Math.round((decimal - 1) * 100);
+  return '-' + Math.round(100 / (decimal - 1));
+}
+function impliedProb(decimalOdds) { return decimalOdds > 1 ? (1 / decimalOdds) * 100 : null; }
+// Probabilidad real (sin vig) de una selección dentro de su mercado:
+// p_real = (1/dec) / Σ(1/dec del mercado)
+function realProb(decimalOdds, mercado) {
+  if (!mercado || decimalOdds <= 1) return impliedProb(decimalOdds);
+  const suma = mercado.selections.reduce((s, x) => s + (x.decimalOdds > 1 ? 1 / x.decimalOdds : 0), 0);
+  if (suma <= 0) return impliedProb(decimalOdds);
+  return ((1 / decimalOdds) / suma) * 100;
+}
+function fmt(n, dec = 2) { return Number(n).toFixed(dec); }
+
+// ============================================================
+// ===== RESULTADOS REALES (TheSportsDB + ESPN + MLB StatsAPI) =====
+// Datos descargados el 15-nov-2026. Formato compacto por liga:
+//   RESULTADOS_REALES_LM[liga] = [[home, hs, away, as, status, date], ...]
+// status: 'Final' (jugado), 'Scheduled' (pendiente), 'Live' (en curso)
+const RESULTADOS_REALES_LM = {"LaLiga":[["Deportivo Alavés",3,"Getafe",0,"Final","2026-08-15"],["Sevilla",2,"Rayo Vallecano",1,"Final","2026-08-15"],["Espanyol",3,"Levante",0,"Final","2026-08-16"],["Racing de Santander",2,"Villarreal",2,"Final","2026-08-16"],["Deportivo de La Coruña",1,"Elche",1,"Final","2026-08-17"],["Atlético de Madrid",2,"Málaga",0,"Final","2026-08-19"],["Rayo Vallecano",1,"Deportivo Alavés",1,"Final","2026-08-20"],["Real Betis",1,"Real Sociedad",0,"Final","2026-08-21"],["Athletic Club",1,"Sevilla",3,"Final","2026-08-22"],["Espanyol",1,"Real Madrid",2,"Final","2026-08-22"],["Valencia",0,"Celta de Vigo",0,"Final","2026-08-22"],["Atlético de Madrid",2,"Villarreal",2,"Final","2026-08-23"],["Elche",0,"FC Barcelona",5,"Final","2026-08-23"],["Getafe",1,"Racing de Santander",0,"Final","2026-08-23"],["Málaga",1,"Deportivo de La Coruña",1,"Final","2026-08-24"],["Osasuna",0,"Levante",0,"Final","2026-08-24"],["Valencia",0,"Real Betis",1,"Final","2026-08-25"],["Real Madrid",4,"Real Sociedad",1,"Final","2026-08-26"],["Celta de Vigo",1,"Osasuna",2,"Final","2026-08-27"],["FC Barcelona",2,"Athletic Club",0,"Final","2026-08-27"],["Deportivo Alavés",1,"Villarreal",0,"Final","2026-08-28"],["Racing de Santander",3,"Elche",2,"Final","2026-08-28"],["Levante",5,"Real Betis",2,"Final","2026-08-29"],["Real Sociedad",2,"Espanyol",1,"Final","2026-08-29"],["Sevilla",1,"Atlético de Madrid",3,"Final","2026-08-29"],["Celta de Vigo",0,"Athletic Club",2,"Final","2026-08-30"],["Deportivo de La Coruña",3,"Valencia",1,"Final","2026-08-30"],["Real Madrid",4,"Málaga",0,"Final","2026-08-30"],["FC Barcelona",5,"Rayo Vallecano",2,"Final","2026-08-31"],["Osasuna",1,"Getafe",0,"Final","2026-08-31"],["Real Sociedad",0,"Celta de Vigo",0,"Final","2026-09-03"],["Real Betis",1,"Real Madrid",0,"Final","2026-09-04"],["Athletic Club",3,"Atlético de Madrid",0,"Final","2026-09-05"],["Rayo Vallecano",3,"Racing de Santander",2,"Final","2026-09-05"],["Villarreal",2,"Deportivo de La Coruña",3,"Final","2026-09-05"],["Deportivo Alavés",5,"Osasuna",2,"Final","2026-09-06"],["Espanyol",1,"Sevilla",1,"Final","2026-09-06"],["Málaga",0,"Levante",0,"Final","2026-09-06"],["Valencia",0,"FC Barcelona",5,"Final","2026-09-06"],["Elche",2,"Real Sociedad",3,"Final","2026-09-07"],["Getafe",1,"Celta de Vigo",1,"Final","2026-09-07"],["Sevilla",1,"Valencia",0,"Final","2026-09-11"],["Athletic Club",1,"Elche",1,"Final","2026-09-12"],["Osasuna",0,"Espanyol",2,"Final","2026-09-12"],["Racing de Santander",2,"Deportivo Alavés",1,"Final","2026-09-12"],["Real Madrid",4,"Rayo Vallecano",1,"Final","2026-09-12"],["Celta de Vigo",1,"Málaga",1,"Final","2026-09-13"],["Getafe",1,"Deportivo de La Coruña",1,"Final","2026-09-13"],["Levante",2,"FC Barcelona",4,"Final","2026-09-13"],["Real Sociedad",0,"Atlético de Madrid",3,"Final","2026-09-13"],["Villarreal",1,"Real Betis",2,"Final","2026-09-14"],["Deportivo Alavés",0,"Valencia",1,"Final","2026-09-15"],["Elche",2,"Real Madrid",3,"Final","2026-09-15"],["Rayo Vallecano",2,"Espanyol",1,"Final","2026-09-15"],["Atlético de Madrid",4,"Osasuna",0,"Final","2026-09-16"],["Deportivo de La Coruña",0,"Sevilla",1,"Final","2026-09-16"],["FC Barcelona",7,"Racing de Santander",2,"Final","2026-09-16"],["Málaga",1,"Villarreal",3,"Final","2026-09-17"],["Real Betis",1,"Getafe",0,"Final","2026-09-17"],["Espanyol",1,"Elche",3,"Final","2026-09-18"],["Athletic Club",0,"Deportivo Alavés",0,"Final","2026-09-19"],["Celta de Vigo",5,"Racing de Santander",0,"Final","2026-09-19"],["Osasuna",1,"Rayo Vallecano",1,"Final","2026-09-19"],["Sevilla",1,"FC Barcelona",3,"Final","2026-09-19"],["Atlético de Madrid",2,"Real Madrid",1,"Final","2026-09-20"],["Deportivo de La Coruña",1,"Real Betis",1,"Final","2026-09-20"],["Getafe",1,"Málaga",0,"Final","2026-09-20"],["Valencia",2,"Real Sociedad",3,"Final","2026-09-20"],["Villarreal",3,"Levante",1,"Final","2026-09-20"],["Málaga",1,"Espanyol",1,"Final","2026-10-09"],["Deportivo Alavés",1,"Atlético de Madrid",2,"Final","2026-10-10"],["FC Barcelona",3,"Getafe",0,"Final","2026-10-10"],["Rayo Vallecano",0,"Athletic Club",0,"Final","2026-10-10"],["Real Madrid",1,"Villarreal",0,"Final","2026-10-10"],["Elche",0,"Celta de Vigo",0,"Final","2026-10-11"],["Racing de Santander",2,"Valencia",2,"Final","2026-10-11"],["Real Betis",5,"Osasuna",2,"Final","2026-10-11"],["Real Sociedad",3,"Deportivo de La Coruña",2,"Final","2026-10-11"],["Levante",3,"Sevilla",3,"Final","2026-10-12"],["Deportivo de La Coruña",1,"Levante",1,"Final","2026-10-16"],["Espanyol",0,"Atlético de Madrid",1,"Final","2026-10-17"],["Real Betis",2,"FC Barcelona",5,"Final","2026-10-17"],["Valencia",0,"Athletic Club",0,"Final","2026-10-17"],["Villarreal",0,"Elche",0,"Final","2026-10-17"],["Celta de Vigo",2,"Deportivo Alavés",1,"Final","2026-10-18"],["Málaga",2,"Real Sociedad",5,"Final","2026-10-18"],["Osasuna",2,"Racing de Santander",0,"Final","2026-10-18"],["Real Madrid",4,"Sevilla",1,"Final","2026-10-18"],["Getafe",1,"Rayo Vallecano",1,"Final","2026-10-19"],["Levante",3,"Athletic Club",1,"Final","2026-10-21"],["Deportivo Alavés",1,"Málaga",1,"Final","2026-10-23"],["Atlético de Madrid",1,"Deportivo de La Coruña",0,"Final","2026-10-24"],["Racing de Santander",2,"Espanyol",1,"Final","2026-10-24"],["Rayo Vallecano",0,"Elche",3,"Final","2026-10-24"],["Valencia",1,"Villarreal",2,"Final","2026-10-24"],["Athletic Club",4,"Getafe",0,"Final","2026-10-25"],["Celta de Vigo",0,"Real Betis",0,"Final","2026-10-25"],["FC Barcelona",1,"Real Madrid",2,"Final","2026-10-25"],["Real Sociedad",2,"Levante",1,"Final","2026-10-25"],["Sevilla",2,"Osasuna",0,"Final","2026-10-26"],["Villarreal",0,"Espanyol",1,"Final","2026-10-30"],["FC Barcelona",6,"Deportivo Alavés",1,"Final","2026-10-31"],["Levante",0,"Atlético de Madrid",2,"Final","2026-10-31"],["Rayo Vallecano",3,"Celta de Vigo",0,"Final","2026-10-31"],["Real Betis",2,"Málaga",1,"Final","2026-10-31"],["Athletic Club",2,"Real Sociedad",1,"Final","2026-11-01"],["Elche",0,"Valencia",1,"Final","2026-11-01"],["Getafe",3,"Sevilla",1,"Final","2026-11-01"],["Racing de Santander",0,"Real Madrid",3,"Final","2026-11-01"],["Deportivo de La Coruña",2,"Osasuna",1,"Final","2026-11-02"],["Sevilla",0,"Deportivo Alavés",0,"Final","2026-11-06"],["Espanyol",0,"Deportivo de La Coruña",0,"Final","2026-11-07"],["Málaga",1,"Racing de Santander",2,"Final","2026-11-07"],["Osasuna",1,"Athletic Club",1,"Final","2026-11-07"],["Valencia",0,"Real Madrid",3,"Final","2026-11-07"],["Atlético de Madrid",1,"FC Barcelona",2,"Final","2026-11-08"],["Celta de Vigo",0,"Levante",0,"Final","2026-11-08"],["Elche",0,"Real Betis",2,"Final","2026-11-08"],["Real Sociedad",1,"Rayo Vallecano",0,"Final","2026-11-08"],["Villarreal",2,"Getafe",0,"Final","2026-11-08"],["Athletic Club",0,"Espanyol",0,"Scheduled","2026-11-22"],["Deportivo Alavés",0,"Deportivo de La Coruña",0,"Scheduled","2026-11-22"],["FC Barcelona",0,"Villarreal",0,"Scheduled","2026-11-22"],["Getafe",0,"Atlético de Madrid",0,"Scheduled","2026-11-22"],["Levante",0,"Elche",0,"Scheduled","2026-11-22"],["Osasuna",0,"Málaga",0,"Scheduled","2026-11-22"],["Racing de Santander",0,"Real Sociedad",0,"Scheduled","2026-11-22"],["Rayo Vallecano",0,"Valencia",0,"Scheduled","2026-11-22"],["Real Madrid",0,"Celta de Vigo",0,"Scheduled","2026-11-22"],["Sevilla",0,"Real Betis",0,"Scheduled","2026-11-22"],["Celta de Vigo",0,"Villarreal",0,"Scheduled","2026-11-29"],["Deportivo de La Coruña",0,"FC Barcelona",0,"Scheduled","2026-11-29"],["Elche",0,"Atlético de Madrid",0,"Scheduled","2026-11-29"],["Espanyol",0,"Getafe",0,"Scheduled","2026-11-29"],["Levante",0,"Racing de Santander",0,"Scheduled","2026-11-29"],["Málaga",0,"Athletic Club",0,"Scheduled","2026-11-29"],["Real Betis",0,"Rayo Vallecano",0,"Scheduled","2026-11-29"],["Real Madrid",0,"Deportivo Alavés",0,"Scheduled","2026-11-29"],["Real Sociedad",0,"Sevilla",0,"Scheduled","2026-11-29"],["Valencia",0,"Osasuna",0,"Scheduled","2026-11-29"],["Athletic Club",0,"Real Madrid",0,"Scheduled","2026-12-06"],["Atlético de Madrid",0,"Real Betis",0,"Scheduled","2026-12-06"],["Deportivo Alavés",0,"Espanyol",0,"Scheduled","2026-12-06"],["FC Barcelona",0,"Celta de Vigo",0,"Scheduled","2026-12-06"],["Getafe",0,"Valencia",0,"Scheduled","2026-12-06"],["Osasuna",0,"Elche",0,"Scheduled","2026-12-06"],["Racing de Santander",0,"Deportivo de La Coruña",0,"Scheduled","2026-12-06"],["Rayo Vallecano",0,"Levante",0,"Scheduled","2026-12-06"],["Sevilla",0,"Málaga",0,"Scheduled","2026-12-06"],["Villarreal",0,"Real Sociedad",0,"Scheduled","2026-12-06"],["Atlético de Madrid",0,"Valencia",0,"Scheduled","2026-12-13"],["Deportivo de La Coruña",0,"Athletic Club",0,"Scheduled","2026-12-13"],["Elche",0,"Sevilla",0,"Scheduled","2026-12-13"],["Espanyol",0,"Celta de Vigo",0,"Scheduled","2026-12-13"],["Levante",0,"Deportivo Alavés",0,"Scheduled","2026-12-13"],["Málaga",0,"FC Barcelona",0,"Scheduled","2026-12-13"],["Real Betis",0,"Racing de Santander",0,"Scheduled","2026-12-13"],["Real Madrid",0,"Osasuna",0,"Scheduled","2026-12-13"],["Real Sociedad",0,"Getafe",0,"Scheduled","2026-12-13"],["Villarreal",0,"Rayo Vallecano",0,"Scheduled","2026-12-13"],["Athletic Club",0,"Real Betis",0,"Scheduled","2026-12-20"],["Celta de Vigo",0,"Atlético de Madrid",0,"Scheduled","2026-12-20"],["Deportivo Alavés",0,"Elche",0,"Scheduled","2026-12-20"],["Deportivo de La Coruña",0,"Real Madrid",0,"Scheduled","2026-12-20"],["FC Barcelona",0,"Real Sociedad",0,"Scheduled","2026-12-20"],["Getafe",0,"Levante",0,"Scheduled","2026-12-20"],["Osasuna",0,"Villarreal",0,"Scheduled","2026-12-20"],["Rayo Vallecano",0,"Málaga",0,"Scheduled","2026-12-20"],["Sevilla",0,"Racing de Santander",0,"Scheduled","2026-12-20"],["Valencia",0,"Espanyol",0,"Scheduled","2026-12-20"],["Celta de Vigo",0,"Deportivo de La Coruña",0,"Scheduled","2027-01-03"],["Espanyol",0,"FC Barcelona",0,"Scheduled","2027-01-03"],["Levante",0,"Valencia",0,"Scheduled","2027-01-03"],["Málaga",0,"Elche",0,"Scheduled","2027-01-03"],["Racing de Santander",0,"Athletic Club",0,"Scheduled","2027-01-03"],["Rayo Vallecano",0,"Atlético de Madrid",0,"Scheduled","2027-01-03"],["Real Betis",0,"Deportivo Alavés",0,"Scheduled","2027-01-03"],["Real Madrid",0,"Getafe",0,"Scheduled","2027-01-03"],["Real Sociedad",0,"Osasuna",0,"Scheduled","2027-01-03"],["Villarreal",0,"Sevilla",0,"Scheduled","2027-01-03"],["Athletic Club",0,"Villarreal",0,"Scheduled","2027-01-10"],["Atlético de Madrid",0,"Racing de Santander",0,"Scheduled","2027-01-10"],["Deportivo Alavés",0,"Real Sociedad",0,"Scheduled","2027-01-10"],["Deportivo de La Coruña",0,"Rayo Vallecano",0,"Scheduled","2027-01-10"],["Elche",0,"Getafe",0,"Scheduled","2027-01-10"],["Espanyol",0,"Real Betis",0,"Scheduled","2027-01-10"],["Osasuna",0,"FC Barcelona",0,"Scheduled","2027-01-10"],["Real Madrid",0,"Levante",0,"Scheduled","2027-01-10"],["Sevilla",0,"Celta de Vigo",0,"Scheduled","2027-01-10"],["Valencia",0,"Málaga",0,"Scheduled","2027-01-10"],["Atlético de Madrid",0,"Real Sociedad",0,"Scheduled","2027-01-17"],["Celta de Vigo",0,"Valencia",0,"Scheduled","2027-01-17"],["FC Barcelona",0,"Elche",0,"Scheduled","2027-01-17"],["Getafe",0,"Athletic Club",0,"Scheduled","2027-01-17"],["Levante",0,"Espanyol",0,"Scheduled","2027-01-17"],["Málaga",0,"Real Madrid",0,"Scheduled","2027-01-17"],["Racing de Santander",0,"Osasuna",0,"Scheduled","2027-01-17"],["Rayo Vallecano",0,"Sevilla",0,"Scheduled","2027-01-17"],["Real Betis",0,"Deportivo de La Coruña",0,"Scheduled","2027-01-17"],["Villarreal",0,"Deportivo Alavés",0,"Scheduled","2027-01-17"],["Athletic Club",0,"Levante",0,"Scheduled","2027-01-24"],["Deportivo Alavés",0,"FC Barcelona",0,"Scheduled","2027-01-24"],["Deportivo de La Coruña",0,"Atlético de Madrid",0,"Scheduled","2027-01-24"],["Elche",0,"Rayo Vallecano",0,"Scheduled","2027-01-24"],["Espanyol",0,"Villarreal",0,"Scheduled","2027-01-24"],["Getafe",0,"Osasuna",0,"Scheduled","2027-01-24"],["Racing de Santander",0,"Celta de Vigo",0,"Scheduled","2027-01-24"],["Real Madrid",0,"Real Betis",0,"Scheduled","2027-01-24"],["Real Sociedad",0,"Málaga",0,"Scheduled","2027-01-24"],["Valencia",0,"Sevilla",0,"Scheduled","2027-01-24"],["Atlético de Madrid",0,"Espanyol",0,"Scheduled","2027-01-31"],["Celta de Vigo",0,"Getafe",0,"Scheduled","2027-01-31"],["FC Barcelona",0,"Valencia",0,"Scheduled","2027-01-31"],["Levante",0,"Real Sociedad",0,"Scheduled","2027-01-31"],["Málaga",0,"Deportivo Alavés",0,"Scheduled","2027-01-31"],["Osasuna",0,"Deportivo de La Coruña",0,"Scheduled","2027-01-31"],["Rayo Vallecano",0,"Real Madrid",0,"Scheduled","2027-01-31"],["Real Betis",0,"Elche",0,"Scheduled","2027-01-31"],["Sevilla",0,"Athletic Club",0,"Scheduled","2027-01-31"],["Villarreal",0,"Racing de Santander",0,"Scheduled","2027-01-31"],["Athletic Club",0,"Osasuna",0,"Scheduled","2027-02-07"],["Deportivo Alavés",0,"Celta de Vigo",0,"Scheduled","2027-02-07"],["Deportivo de La Coruña",0,"Málaga",0,"Scheduled","2027-02-07"],["Elche",0,"Levante",0,"Scheduled","2027-02-07"],["Espanyol",0,"Rayo Vallecano",0,"Scheduled","2027-02-07"],["FC Barcelona",0,"Atlético de Madrid",0,"Scheduled","2027-02-07"],["Getafe",0,"Villarreal",0,"Scheduled","2027-02-07"],["Real Betis",0,"Sevilla",0,"Scheduled","2027-02-07"],["Real Sociedad",0,"Real Madrid",0,"Scheduled","2027-02-07"],["Valencia",0,"Racing de Santander",0,"Scheduled","2027-02-07"],["Celta de Vigo",0,"Rayo Vallecano",0,"Scheduled","2027-02-14"],["Elche",0,"Deportivo de La Coruña",0,"Scheduled","2027-02-14"],["Levante",0,"Málaga",0,"Scheduled","2027-02-14"],["Osasuna",0,"Atlético de Madrid",0,"Scheduled","2027-02-14"],["Racing de Santander",0,"Getafe",0,"Scheduled","2027-02-14"],["Real Madrid",0,"Athletic Club",0,"Scheduled","2027-02-14"],["Real Sociedad",0,"Real Betis",0,"Scheduled","2027-02-14"],["Sevilla",0,"Espanyol",0,"Scheduled","2027-02-14"],["Valencia",0,"Deportivo Alavés",0,"Scheduled","2027-02-14"],["Villarreal",0,"FC Barcelona",0,"Scheduled","2027-02-14"],["Athletic Club",0,"Celta de Vigo",0,"Scheduled","2027-02-21"],["Atlético de Madrid",0,"Elche",0,"Scheduled","2027-02-21"],["Deportivo Alavés",0,"Racing de Santander",0,"Scheduled","2027-02-21"],["Deportivo de La Coruña",0,"Real Sociedad",0,"Scheduled","2027-02-21"],["Espanyol",0,"Osasuna",0,"Scheduled","2027-02-21"],["FC Barcelona",0,"Levante",0,"Scheduled","2027-02-21"],["Málaga",0,"Real Betis",0,"Scheduled","2027-02-21"],["Rayo Vallecano",0,"Getafe",0,"Scheduled","2027-02-21"],["Sevilla",0,"Real Madrid",0,"Scheduled","2027-02-21"],["Villarreal",0,"Valencia",0,"Scheduled","2027-02-21"],["Athletic Club",0,"FC Barcelona",0,"Scheduled","2027-02-28"],["Celta de Vigo",0,"Espanyol",0,"Scheduled","2027-02-28"],["Getafe",0,"Deportivo Alavés",0,"Scheduled","2027-02-28"],["Levante",0,"Deportivo de La Coruña",0,"Scheduled","2027-02-28"],["Málaga",0,"Atlético de Madrid",0,"Scheduled","2027-02-28"],["Osasuna",0,"Sevilla",0,"Scheduled","2027-02-28"],["Racing de Santander",0,"Rayo Vallecano",0,"Scheduled","2027-02-28"],["Real Betis",0,"Villarreal",0,"Scheduled","2027-02-28"],["Real Madrid",0,"Valencia",0,"Scheduled","2027-02-28"],["Real Sociedad",0,"Elche",0,"Scheduled","2027-02-28"],["Atlético de Madrid",0,"Celta de Vigo",0,"Scheduled","2027-03-07"],["Deportivo Alavés",0,"Athletic Club",0,"Scheduled","2027-03-07"],["Deportivo de La Coruña",0,"Getafe",0,"Scheduled","2027-03-07"],["Elche",0,"Málaga",0,"Scheduled","2027-03-07"],["Espanyol",0,"Racing de Santander",0,"Scheduled","2027-03-07"],["FC Barcelona",0,"Real Betis",0,"Scheduled","2027-03-07"],["Rayo Vallecano",0,"Osasuna",0,"Scheduled","2027-03-07"],["Sevilla",0,"Real Sociedad",0,"Scheduled","2027-03-07"],["Valencia",0,"Levante",0,"Scheduled","2027-03-07"],["Villarreal",0,"Real Madrid",0,"Scheduled","2027-03-07"],["Athletic Club",0,"Valencia",0,"Scheduled","2027-03-14"],["Deportivo Alavés",0,"Sevilla",0,"Scheduled","2027-03-14"],["Elche",0,"Villarreal",0,"Scheduled","2027-03-14"],["FC Barcelona",0,"Deportivo de La Coruña",0,"Scheduled","2027-03-14"],["Getafe",0,"Real Sociedad",0,"Scheduled","2027-03-14"],["Málaga",0,"Rayo Vallecano",0,"Scheduled","2027-03-14"],["Osasuna",0,"Celta de Vigo",0,"Scheduled","2027-03-14"],["Racing de Santander",0,"Atlético de Madrid",0,"Scheduled","2027-03-14"],["Real Betis",0,"Levante",0,"Scheduled","2027-03-14"],["Real Madrid",0,"Espanyol",0,"Scheduled","2027-03-14"],["Atlético de Madrid",0,"Getafe",0,"Scheduled","2027-03-21"],["Celta de Vigo",0,"Real Madrid",0,"Scheduled","2027-03-21"],["Espanyol",0,"Athletic Club",0,"Scheduled","2027-03-21"],["Levante",0,"Osasuna",0,"Scheduled","2027-03-21"],["Racing de Santander",0,"Real Betis",0,"Scheduled","2027-03-21"],["Rayo Vallecano",0,"FC Barcelona",0,"Scheduled","2027-03-21"],["Real Sociedad",0,"Deportivo Alavés",0,"Scheduled","2027-03-21"],["Sevilla",0,"Elche",0,"Scheduled","2027-03-21"],["Valencia",0,"Deportivo de La Coruña",0,"Scheduled","2027-03-21"],["Villarreal",0,"Málaga",0,"Scheduled","2027-03-21"],["Athletic Club",0,"Racing de Santander",0,"Scheduled","2027-04-04"],["Deportivo de La Coruña",0,"Villarreal",0,"Scheduled","2027-04-04"],["Elche",0,"Deportivo Alavés",0,"Scheduled","2027-04-04"],["FC Barcelona",0,"Sevilla",0,"Scheduled","2027-04-04"],["Getafe",0,"Espanyol",0,"Scheduled","2027-04-04"],["Levante",0,"Rayo Vallecano",0,"Scheduled","2027-04-04"],["Málaga",0,"Osasuna",0,"Scheduled","2027-04-04"],["Real Betis",0,"Celta de Vigo",0,"Scheduled","2027-04-04"],["Real Madrid",0,"Atlético de Madrid",0,"Scheduled","2027-04-04"],["Real Sociedad",0,"Valencia",0,"Scheduled","2027-04-04"],["Atlético de Madrid",0,"Levante",0,"Scheduled","2027-04-11"],["Celta de Vigo",0,"Elche",0,"Scheduled","2027-04-11"],["Deportivo Alavés",0,"Real Betis",0,"Scheduled","2027-04-11"],["Espanyol",0,"Málaga",0,"Scheduled","2027-04-11"],["Osasuna",0,"Real Madrid",0,"Scheduled","2027-04-11"],["Racing de Santander",0,"FC Barcelona",0,"Scheduled","2027-04-11"],["Rayo Vallecano",0,"Real Sociedad",0,"Scheduled","2027-04-11"],["Sevilla",0,"Deportivo de La Coruña",0,"Scheduled","2027-04-11"],["Valencia",0,"Getafe",0,"Scheduled","2027-04-11"],["Villarreal",0,"Athletic Club",0,"Scheduled","2027-04-11"],["Atlético de Madrid",0,"Sevilla",0,"Scheduled","2027-04-18"],["Deportivo Alavés",0,"Rayo Vallecano",0,"Scheduled","2027-04-18"],["Deportivo de La Coruña",0,"Celta de Vigo",0,"Scheduled","2027-04-18"],["Elche",0,"Osasuna",0,"Scheduled","2027-04-18"],["FC Barcelona",0,"Espanyol",0,"Scheduled","2027-04-18"],["Getafe",0,"Real Madrid",0,"Scheduled","2027-04-18"],["Levante",0,"Villarreal",0,"Scheduled","2027-04-18"],["Málaga",0,"Valencia",0,"Scheduled","2027-04-18"],["Real Betis",0,"Athletic Club",0,"Scheduled","2027-04-18"],["Real Sociedad",0,"Racing de Santander",0,"Scheduled","2027-04-18"],["Athletic Club",0,"Deportivo de La Coruña",0,"Scheduled","2027-04-21"],["Celta de Vigo",0,"FC Barcelona",0,"Scheduled","2027-04-21"],["Espanyol",0,"Real Sociedad",0,"Scheduled","2027-04-21"],["Getafe",0,"Real Betis",0,"Scheduled","2027-04-21"],["Osasuna",0,"Deportivo Alavés",0,"Scheduled","2027-04-21"],["Racing de Santander",0,"Málaga",0,"Scheduled","2027-04-21"],["Real Madrid",0,"Elche",0,"Scheduled","2027-04-21"],["Sevilla",0,"Levante",0,"Scheduled","2027-04-21"],["Valencia",0,"Rayo Vallecano",0,"Scheduled","2027-04-21"],["Villarreal",0,"Atlético de Madrid",0,"Scheduled","2027-04-21"],["Atlético de Madrid",0,"Deportivo Alavés",0,"Scheduled","2027-05-02"],["Celta de Vigo",0,"Sevilla",0,"Scheduled","2027-05-02"],["Deportivo de La Coruña",0,"Racing de Santander",0,"Scheduled","2027-05-02"],["Elche",0,"Espanyol",0,"Scheduled","2027-05-02"],["FC Barcelona",0,"Osasuna",0,"Scheduled","2027-05-02"],["Levante",0,"Real Madrid",0,"Scheduled","2027-05-02"],["Málaga",0,"Getafe",0,"Scheduled","2027-05-02"],["Rayo Vallecano",0,"Villarreal",0,"Scheduled","2027-05-02"],["Real Betis",0,"Valencia",0,"Scheduled","2027-05-02"],["Real Sociedad",0,"Athletic Club",0,"Scheduled","2027-05-02"],["Athletic Club",0,"Málaga",0,"Scheduled","2027-05-09"],["Deportivo Alavés",0,"Levante",0,"Scheduled","2027-05-09"],["Getafe",0,"Elche",0,"Scheduled","2027-05-09"],["Osasuna",0,"Real Sociedad",0,"Scheduled","2027-05-09"],["Racing de Santander",0,"Sevilla",0,"Scheduled","2027-05-09"],["Rayo Vallecano",0,"Deportivo de La Coruña",0,"Scheduled","2027-05-09"],["Real Betis",0,"Espanyol",0,"Scheduled","2027-05-09"],["Real Madrid",0,"FC Barcelona",0,"Scheduled","2027-05-09"],["Valencia",0,"Atlético de Madrid",0,"Scheduled","2027-05-09"],["Villarreal",0,"Celta de Vigo",0,"Scheduled","2027-05-09"],["Atlético de Madrid",0,"Rayo Vallecano",0,"Scheduled","2027-05-16"],["Deportivo de La Coruña",0,"Deportivo Alavés",0,"Scheduled","2027-05-16"],["Elche",0,"Athletic Club",0,"Scheduled","2027-05-16"],["Espanyol",0,"Valencia",0,"Scheduled","2027-05-16"],["Levante",0,"Getafe",0,"Scheduled","2027-05-16"],["Málaga",0,"Celta de Vigo",0,"Scheduled","2027-05-16"],["Osasuna",0,"Real Betis",0,"Scheduled","2027-05-16"],["Real Madrid",0,"Racing de Santander",0,"Scheduled","2027-05-16"],["Real Sociedad",0,"FC Barcelona",0,"Scheduled","2027-05-16"],["Sevilla",0,"Villarreal",0,"Scheduled","2027-05-16"],["Atlético de Madrid",0,"Athletic Club",0,"Scheduled","2027-05-23"],["Celta de Vigo",0,"Real Sociedad",0,"Scheduled","2027-05-23"],["Deportivo Alavés",0,"Real Madrid",0,"Scheduled","2027-05-23"],["Deportivo de La Coruña",0,"Espanyol",0,"Scheduled","2027-05-23"],["FC Barcelona",0,"Málaga",0,"Scheduled","2027-05-23"],["Racing de Santander",0,"Levante",0,"Scheduled","2027-05-23"],["Rayo Vallecano",0,"Real Betis",0,"Scheduled","2027-05-23"],["Sevilla",0,"Getafe",0,"Scheduled","2027-05-23"],["Valencia",0,"Elche",0,"Scheduled","2027-05-23"],["Villarreal",0,"Osasuna",0,"Scheduled","2027-05-23"],["Athletic Club",0,"Rayo Vallecano",0,"Scheduled","2027-05-30"],["Elche",0,"Racing de Santander",0,"Scheduled","2027-05-30"],["Espanyol",0,"Deportivo Alavés",0,"Scheduled","2027-05-30"],["Getafe",0,"FC Barcelona",0,"Scheduled","2027-05-30"],["Levante",0,"Celta de Vigo",0,"Scheduled","2027-05-30"],["Málaga",0,"Sevilla",0,"Scheduled","2027-05-30"],["Osasuna",0,"Valencia",0,"Scheduled","2027-05-30"],["Real Betis",0,"Atlético de Madrid",0,"Scheduled","2027-05-30"],["Real Madrid",0,"Deportivo de La Coruña",0,"Scheduled","2027-05-30"],["Real Sociedad",0,"Villarreal",0,"Scheduled","2027-05-30"]],"Premier":[["Arsenal",3,"Coventry City",0,"Final","2026-08-21"],["Hull City",2,"Manchester United",0,"Final","2026-08-22"],["Everton",2,"Crystal Palace",0,"Final","2026-08-22"],["Ipswich Town",2,"Sunderland",1,"Final","2026-08-22"],["Nottingham Forest",0,"Leeds United",1,"Final","2026-08-22"],["Brentford",3,"Tottenham",0,"Final","2026-08-22"],["Manchester City",2,"Bournemouth",1,"Final","2026-08-23"],["Brighton",4,"Aston Villa",0,"Final","2026-08-23"],["Newcastle",2,"Liverpool",2,"Final","2026-08-23"],["Fulham",2,"Chelsea",3,"Final","2026-08-24"],["Crystal Palace",1,"Manchester City",4,"Final","2026-08-28"],["Bournemouth",1,"Everton",1,"Final","2026-08-29"],["Liverpool",2,"Nottingham Forest",2,"Final","2026-08-29"],["Tottenham",0,"Newcastle",2,"Final","2026-08-29"],["Coventry City",0,"Hull City",1,"Final","2026-08-29"],["Manchester United",5,"Ipswich Town",2,"Final","2026-08-30"],["Chelsea",4,"Brighton",3,"Final","2026-08-30"],["Leeds United",1,"Brentford",1,"Final","2026-08-30"],["Sunderland",1,"Fulham",0,"Final","2026-08-30"],["Aston Villa",0,"Arsenal",1,"Final","2026-08-31"],["Ipswich Town",0,"Liverpool",2,"Final","2026-09-04"],["Newcastle",2,"Bournemouth",2,"Final","2026-09-05"],["Fulham",2,"Crystal Palace",3,"Final","2026-09-05"],["Manchester City",1,"Coventry City",0,"Final","2026-09-05"],["Brighton",1,"Leeds United",1,"Final","2026-09-05"],["Brentford",1,"Sunderland",1,"Final","2026-09-05"],["Hull City",0,"Aston Villa",0,"Final","2026-09-05"],["Nottingham Forest",0,"Tottenham",0,"Final","2026-09-05"],["Arsenal",2,"Chelsea",1,"Final","2026-09-06"],["Everton",2,"Manchester United",2,"Final","2026-09-06"],["Bournemouth",2,"Brentford",2,"Final","2026-09-12"],["Liverpool",0,"Fulham",0,"Final","2026-09-12"],["Tottenham",0,"Everton",0,"Final","2026-09-12"],["Chelsea",2,"Hull City",2,"Final","2026-09-12"],["Crystal Palace",2,"Ipswich Town",3,"Final","2026-09-12"],["Aston Villa",1,"Nottingham Forest",2,"Final","2026-09-12"],["Sunderland",0,"Arsenal",2,"Final","2026-09-12"],["Manchester United",0,"Manchester City",1,"Final","2026-09-13"],["Coventry City",0,"Brighton",5,"Final","2026-09-13"],["Leeds United",4,"Newcastle",1,"Final","2026-09-14"],["Brentford",3,"Chelsea",0,"Final","2026-09-18"],["Newcastle",2,"Hull City",1,"Final","2026-09-19"],["Everton",1,"Ipswich Town",0,"Final","2026-09-19"],["Tottenham",2,"Aston Villa",3,"Final","2026-09-19"],["Brighton",3,"Arsenal",0,"Final","2026-09-19"],["Nottingham Forest",0,"Coventry City",1,"Final","2026-09-19"],["Bournemouth",0,"Liverpool",1,"Final","2026-09-20"],["Fulham",1,"Manchester United",1,"Final","2026-09-20"],["Manchester City",5,"Sunderland",3,"Final","2026-09-20"],["Leeds United",0,"Crystal Palace",0,"Final","2026-09-20"],["Manchester United",1,"Tottenham",1,"Final","2026-10-10"],["Arsenal",2,"Leeds United",1,"Final","2026-10-10"],["Chelsea",5,"Bournemouth",1,"Final","2026-10-10"],["Ipswich Town",2,"Fulham",1,"Final","2026-10-10"],["Aston Villa",2,"Brentford",2,"Final","2026-10-10"],["Sunderland",0,"Brighton",2,"Final","2026-10-10"],["Liverpool",0,"Manchester City",3,"Final","2026-10-11"],["Crystal Palace",3,"Nottingham Forest",1,"Final","2026-10-11"],["Hull City",2,"Everton",2,"Final","2026-10-11"],["Coventry City",4,"Newcastle",1,"Final","2026-10-12"],["Newcastle",0,"Aston Villa",1,"Final","2026-10-17"],["Fulham",1,"Hull City",0,"Final","2026-10-17"],["Everton",0,"Chelsea",2,"Final","2026-10-17"],["Manchester City",3,"Ipswich Town",2,"Final","2026-10-17"],["Brentford",1,"Liverpool",2,"Final","2026-10-17"],["Bournemouth",2,"Sunderland",0,"Final","2026-10-18"],["Brighton",5,"Crystal Palace",0,"Final","2026-10-18"],["Leeds United",1,"Manchester United",1,"Final","2026-10-18"],["Nottingham Forest",0,"Arsenal",1,"Final","2026-10-18"],["Tottenham",3,"Coventry City",1,"Final","2026-10-19"],["Ipswich Town",1,"Nottingham Forest",1,"Final","2026-10-23"],["Arsenal",2,"Everton",0,"Final","2026-10-24"],["Chelsea",0,"Tottenham",2,"Final","2026-10-24"],["Aston Villa",2,"Manchester City",1,"Final","2026-10-24"],["Coventry City",0,"Fulham",1,"Final","2026-10-24"],["Manchester United",0,"Bournemouth",3,"Final","2026-10-25"],["Liverpool",2,"Brighton",0,"Final","2026-10-25"],["Crystal Palace",0,"Newcastle",2,"Final","2026-10-25"],["Hull City",1,"Brentford",1,"Final","2026-10-25"],["Sunderland",0,"Leeds United",0,"Final","2026-10-25"],["Bournemouth",2,"Leeds United",0,"Final","2026-10-31"],["Tottenham",2,"Crystal Palace",0,"Final","2026-10-31"],["Chelsea",2,"Manchester United",0,"Final","2026-10-31"],["Manchester City",0,"Brighton",1,"Final","2026-10-31"],["Brentford",2,"Nottingham Forest",0,"Final","2026-10-31"],["Hull City",2,"Ipswich Town",2,"Final","2026-10-31"],["Aston Villa",1,"Fulham",1,"Final","2026-10-31"],["Coventry City",3,"Sunderland",1,"Final","2026-10-31"],["Liverpool",0,"Arsenal",1,"Final","2026-11-01"],["Newcastle",0,"Everton",1,"Final","2026-11-02"],["Everton",3,"Coventry City",1,"Final","2026-11-06"],["Fulham",1,"Newcastle",1,"Final","2026-11-07"],["Arsenal",1,"Hull City",0,"Final","2026-11-07"],["Leeds United",1,"Tottenham",0,"Final","2026-11-07"],["Nottingham Forest",3,"Manchester City",1,"Final","2026-11-07"],["Manchester United",4,"Aston Villa",4,"Final","2026-11-08"],["Brighton",2,"Brentford",0,"Final","2026-11-08"],["Crystal Palace",1,"Liverpool",3,"Final","2026-11-08"],["Ipswich Town",1,"Bournemouth",2,"Final","2026-11-08"],["Sunderland",1,"Chelsea",0,"Final","2026-11-08"]],"SerieA":[["Genoa",0,"Napoli",2,"Final","2026-08-22"],["Inter",4,"Monza",1,"Final","2026-08-22"],["Parma",0,"Cagliari",1,"Final","2026-08-22"],["Udinese",1,"Como",1,"Final","2026-08-22"],["Atalanta",2,"Sassuolo",1,"Final","2026-08-23"],["Frosinone",0,"Juventus",1,"Final","2026-08-23"],["Torino",1,"Milan",2,"Final","2026-08-23"],["Venezia",0,"Lecce",2,"Final","2026-08-23"],["Bologna",0,"Lazio",1,"Final","2026-08-24"],["Roma",4,"Fiorentina",0,"Final","2026-08-24"],["Milan",2,"Venezia",0,"Final","2026-08-28"],["Fiorentina",0,"Frosinone",3,"Final","2026-08-29"],["Juventus",2,"Parma",0,"Final","2026-08-29"],["Monza",2,"Udinese",3,"Final","2026-08-29"],["Sassuolo",2,"Torino",1,"Final","2026-08-29"],["Cagliari",0,"Inter",1,"Final","2026-08-30"],["Lazio",1,"Genoa",0,"Final","2026-08-30"],["Napoli",1,"Como",2,"Final","2026-08-30"],["Atalanta",1,"Bologna",0,"Final","2026-08-31"],["Lecce",0,"Roma",4,"Final","2026-08-31"],["Genoa",1,"Como",4,"Final","2026-09-04"],["Fiorentina",1,"Torino",2,"Final","2026-09-05"],["Inter",3,"Napoli",2,"Final","2026-09-05"],["Roma",2,"Atalanta",1,"Final","2026-09-05"],["Bologna",2,"Sassuolo",2,"Final","2026-09-06"],["Frosinone",3,"Venezia",2,"Final","2026-09-06"],["Juventus",1,"Milan",1,"Final","2026-09-06"],["Parma",1,"Monza",1,"Final","2026-09-06"],["Cagliari",1,"Lecce",0,"Final","2026-09-07"],["Udinese",1,"Lazio",2,"Final","2026-09-07"],["Venezia",2,"Fiorentina",4,"Final","2026-09-11"],["Atalanta",1,"Cagliari",2,"Final","2026-09-12"],["Genoa",1,"Frosinone",1,"Final","2026-09-12"],["Lazio",2,"Milan",2,"Final","2026-09-12"],["Lecce",3,"Monza",2,"Final","2026-09-13"],["Napoli",1,"Bologna",0,"Final","2026-09-13"],["Sassuolo",3,"Juventus",2,"Final","2026-09-13"],["Como",2,"Parma",1,"Final","2026-09-14"],["Inter",5,"Udinese",3,"Final","2026-09-14"],["Torino",0,"Roma",2,"Final","2026-09-14"],["Monza",2,"Sassuolo",1,"Final","2026-09-18"],["Bologna",1,"Torino",1,"Final","2026-09-19"],["Roma",2,"Inter",2,"Final","2026-09-19"],["Udinese",0,"Cagliari",1,"Final","2026-09-19"],["Venezia",0,"Lazio",2,"Final","2026-09-19"],["Fiorentina",1,"Napoli",1,"Final","2026-09-20"],["Frosinone",2,"Como",0,"Final","2026-09-20"],["Juventus",2,"Atalanta",0,"Final","2026-09-20"],["Milan",3,"Lecce",0,"Final","2026-09-20"],["Parma",2,"Genoa",1,"Final","2026-09-20"],["Genoa",2,"Fiorentina",1,"Final","2026-10-10"],["Inter",3,"Parma",0,"Final","2026-10-10"],["Napoli",3,"Frosinone",0,"Final","2026-10-10"],["Cagliari",1,"Juventus",1,"Final","2026-10-11"],["Como",0,"Roma",0,"Final","2026-10-11"],["Lazio",3,"Monza",1,"Final","2026-10-11"],["Lecce",1,"Bologna",2,"Final","2026-10-11"],["Sassuolo",1,"Milan",1,"Final","2026-10-11"],["Atalanta",3,"Venezia",1,"Final","2026-10-12"],["Torino",2,"Udinese",1,"Final","2026-10-12"],["Frosinone",4,"Sassuolo",2,"Final","2026-10-16"],["Bologna",1,"Inter",3,"Final","2026-10-17"],["Roma",2,"Genoa",0,"Final","2026-10-17"],["Venezia",1,"Napoli",0,"Final","2026-10-17"],["Fiorentina",1,"Como",3,"Final","2026-10-18"],["Juventus",0,"Lazio",3,"Final","2026-10-18"],["Milan",3,"Atalanta",2,"Final","2026-10-18"],["Udinese",0,"Lecce",3,"Final","2026-10-18"],["Monza",4,"Cagliari",0,"Final","2026-10-19"],["Parma",0,"Torino",3,"Final","2026-10-19"],["Torino",3,"Monza",2,"Final","2026-10-23"],["Cagliari",0,"Bologna",2,"Final","2026-10-24"],["Como",2,"Sassuolo",0,"Final","2026-10-24"],["Lazio",2,"Parma",1,"Final","2026-10-24"],["Napoli",3,"Roma",3,"Final","2026-10-24"],["Atalanta",4,"Frosinone",4,"Final","2026-10-25"],["Genoa",1,"Venezia",0,"Final","2026-10-25"],["Inter",2,"Fiorentina",1,"Final","2026-10-25"],["Lecce",0,"Juventus",2,"Final","2026-10-25"],["Udinese",0,"Milan",2,"Final","2026-10-25"],["Roma",4,"Cagliari",2,"Final","2026-10-27"],["Sassuolo",2,"Lazio",6,"Final","2026-10-27"],["Torino",1,"Como",3,"Final","2026-10-27"],["Genoa",2,"Juventus",0,"Final","2026-10-28"],["Milan",2,"Bologna",4,"Final","2026-10-28"],["Monza",1,"Napoli",4,"Final","2026-10-28"],["Parma",0,"Udinese",0,"Final","2026-10-28"],["Venezia",0,"Inter",2,"Final","2026-10-28"],["Fiorentina",2,"Atalanta",2,"Final","2026-10-29"],["Frosinone",5,"Lecce",1,"Final","2026-10-29"],["Bologna",2,"Monza",1,"Final","2026-10-31"],["Milan",3,"Inter",1,"Final","2026-10-31"],["Udinese",2,"Roma",5,"Final","2026-10-31"],["Como",1,"Venezia",0,"Final","2026-11-01"],["Frosinone",2,"Torino",0,"Final","2026-11-01"],["Juventus",2,"Napoli",0,"Final","2026-11-01"],["Lazio",2,"Cagliari",1,"Final","2026-11-01"],["Lecce",1,"Genoa",2,"Final","2026-11-01"],["Atalanta",0,"Parma",3,"Final","2026-11-02"],["Sassuolo",2,"Fiorentina",4,"Final","2026-11-02"],["Venezia",2,"Udinese",1,"Final","2026-11-06"],["Cagliari",1,"Frosinone",0,"Final","2026-11-07"],["Parma",1,"Bologna",2,"Final","2026-11-07"],["Roma",3,"Sassuolo",0,"Final","2026-11-07"],["Torino",1,"Lecce",1,"Final","2026-11-07"],["Fiorentina",2,"Juventus",2,"Final","2026-11-08"],["Genoa",1,"Milan",2,"Final","2026-11-08"],["Inter",2,"Como",0,"Final","2026-11-08"],["Monza",0,"Atalanta",1,"Final","2026-11-08"],["Napoli",1,"Lazio",1,"Final","2026-11-08"],["Atalanta",0,"Inter",0,"Scheduled","2026-11-22"],["Bologna",0,"Udinese",0,"Scheduled","2026-11-22"],["Como",0,"Cagliari",0,"Scheduled","2026-11-22"],["Juventus",0,"Venezia",0,"Scheduled","2026-11-22"],["Lazio",0,"Lecce",0,"Scheduled","2026-11-22"],["Milan",0,"Frosinone",0,"Scheduled","2026-11-22"],["Monza",0,"Fiorentina",0,"Scheduled","2026-11-22"],["Napoli",0,"Torino",0,"Scheduled","2026-11-22"],["Parma",0,"Roma",0,"Scheduled","2026-11-22"],["Sassuolo",0,"Genoa",0,"Scheduled","2026-11-22"],["Cagliari",0,"Milan",0,"Scheduled","2026-11-29"],["Como",0,"Juventus",0,"Scheduled","2026-11-29"],["Frosinone",0,"Parma",0,"Scheduled","2026-11-29"],["Inter",0,"Genoa",0,"Scheduled","2026-11-29"],["Lecce",0,"Atalanta",0,"Scheduled","2026-11-29"],["Roma",0,"Monza",0,"Scheduled","2026-11-29"],["Sassuolo",0,"Napoli",0,"Scheduled","2026-11-29"],["Torino",0,"Lazio",0,"Scheduled","2026-11-29"],["Udinese",0,"Fiorentina",0,"Scheduled","2026-11-29"],["Venezia",0,"Bologna",0,"Scheduled","2026-11-29"],["Atalanta",0,"Como",0,"Scheduled","2026-12-06"],["Bologna",0,"Fiorentina",0,"Scheduled","2026-12-06"],["Cagliari",0,"Genoa",0,"Scheduled","2026-12-06"],["Frosinone",0,"Inter",0,"Scheduled","2026-12-06"],["Juventus",0,"Monza",0,"Scheduled","2026-12-06"],["Lazio",0,"Roma",0,"Scheduled","2026-12-06"],["Lecce",0,"Napoli",0,"Scheduled","2026-12-06"],["Milan",0,"Parma",0,"Scheduled","2026-12-06"],["Sassuolo",0,"Udinese",0,"Scheduled","2026-12-06"],["Torino",0,"Venezia",0,"Scheduled","2026-12-06"],["Atalanta",0,"Genoa",0,"Scheduled","2026-12-13"],["Bologna",0,"Como",0,"Scheduled","2026-12-13"],["Cagliari",0,"Fiorentina",0,"Scheduled","2026-12-13"],["Frosinone",0,"Lazio",0,"Scheduled","2026-12-13"],["Inter",0,"Lecce",0,"Scheduled","2026-12-13"],["Juventus",0,"Torino",0,"Scheduled","2026-12-13"],["Milan",0,"Monza",0,"Scheduled","2026-12-13"],["Napoli",0,"Udinese",0,"Scheduled","2026-12-13"],["Parma",0,"Sassuolo",0,"Scheduled","2026-12-13"],["Roma",0,"Venezia",0,"Scheduled","2026-12-13"],["Atalanta",0,"Lazio",0,"Scheduled","2026-12-20"],["Bologna",0,"Frosinone",0,"Scheduled","2026-12-20"],["Cagliari",0,"Napoli",0,"Scheduled","2026-12-20"],["Como",0,"Lecce",0,"Scheduled","2026-12-20"],["Fiorentina",0,"Parma",0,"Scheduled","2026-12-20"],["Genoa",0,"Monza",0,"Scheduled","2026-12-20"],["Inter",0,"Torino",0,"Scheduled","2026-12-20"],["Juventus",0,"Udinese",0,"Scheduled","2026-12-20"],["Milan",0,"Roma",0,"Scheduled","2026-12-20"],["Sassuolo",0,"Venezia",0,"Scheduled","2026-12-20"],["Atalanta",0,"Napoli",0,"Scheduled","2027-01-03"],["Bologna",0,"Genoa",0,"Scheduled","2027-01-03"],["Cagliari",0,"Torino",0,"Scheduled","2027-01-03"],["Como",0,"Lazio",0,"Scheduled","2027-01-03"],["Fiorentina",0,"Milan",0,"Scheduled","2027-01-03"],["Frosinone",0,"Udinese",0,"Scheduled","2027-01-03"],["Inter",0,"Sassuolo",0,"Scheduled","2027-01-03"],["Juventus",0,"Roma",0,"Scheduled","2027-01-03"],["Lecce",0,"Parma",0,"Scheduled","2027-01-03"],["Monza",0,"Venezia",0,"Scheduled","2027-01-03"],["Atalanta",0,"Torino",0,"Scheduled","2027-01-06"],["Bologna",0,"Juventus",0,"Scheduled","2027-01-06"],["Cagliari",0,"Sassuolo",0,"Scheduled","2027-01-06"],["Como",0,"Monza",0,"Scheduled","2027-01-06"],["Fiorentina",0,"Lecce",0,"Scheduled","2027-01-06"],["Frosinone",0,"Roma",0,"Scheduled","2027-01-06"],["Genoa",0,"Udinese",0,"Scheduled","2027-01-06"],["Inter",0,"Lazio",0,"Scheduled","2027-01-06"],["Milan",0,"Napoli",0,"Scheduled","2027-01-06"],["Parma",0,"Venezia",0,"Scheduled","2027-01-06"],["Atalanta",0,"Udinese",0,"Scheduled","2027-01-10"],["Bologna",0,"Roma",0,"Scheduled","2027-01-10"],["Cagliari",0,"Venezia",0,"Scheduled","2027-01-10"],["Como",0,"Milan",0,"Scheduled","2027-01-10"],["Fiorentina",0,"Lazio",0,"Scheduled","2027-01-10"],["Frosinone",0,"Monza",0,"Scheduled","2027-01-10"],["Genoa",0,"Torino",0,"Scheduled","2027-01-10"],["Inter",0,"Juventus",0,"Scheduled","2027-01-10"],["Lecce",0,"Sassuolo",0,"Scheduled","2027-01-10"],["Napoli",0,"Parma",0,"Scheduled","2027-01-10"],["Cagliari",0,"Parma",0,"Scheduled","2027-01-17"],["Como",0,"Udinese",0,"Scheduled","2027-01-17"],["Fiorentina",0,"Roma",0,"Scheduled","2027-01-17"],["Juventus",0,"Frosinone",0,"Scheduled","2027-01-17"],["Lazio",0,"Bologna",0,"Scheduled","2027-01-17"],["Lecce",0,"Venezia",0,"Scheduled","2027-01-17"],["Milan",0,"Torino",0,"Scheduled","2027-01-17"],["Monza",0,"Inter",0,"Scheduled","2027-01-17"],["Napoli",0,"Genoa",0,"Scheduled","2027-01-17"],["Sassuolo",0,"Atalanta",0,"Scheduled","2027-01-17"],["Bologna",0,"Atalanta",0,"Scheduled","2027-01-24"],["Como",0,"Napoli",0,"Scheduled","2027-01-24"],["Frosinone",0,"Fiorentina",0,"Scheduled","2027-01-24"],["Genoa",0,"Lazio",0,"Scheduled","2027-01-24"],["Inter",0,"Cagliari",0,"Scheduled","2027-01-24"],["Parma",0,"Juventus",0,"Scheduled","2027-01-24"],["Roma",0,"Lecce",0,"Scheduled","2027-01-24"],["Torino",0,"Sassuolo",0,"Scheduled","2027-01-24"],["Udinese",0,"Monza",0,"Scheduled","2027-01-24"],["Venezia",0,"Milan",0,"Scheduled","2027-01-24"],["Atalanta",0,"Roma",0,"Scheduled","2027-01-31"],["Como",0,"Genoa",0,"Scheduled","2027-01-31"],["Lazio",0,"Udinese",0,"Scheduled","2027-01-31"],["Lecce",0,"Cagliari",0,"Scheduled","2027-01-31"],["Milan",0,"Juventus",0,"Scheduled","2027-01-31"],["Monza",0,"Parma",0,"Scheduled","2027-01-31"],["Napoli",0,"Inter",0,"Scheduled","2027-01-31"],["Sassuolo",0,"Bologna",0,"Scheduled","2027-01-31"],["Torino",0,"Fiorentina",0,"Scheduled","2027-01-31"],["Venezia",0,"Frosinone",0,"Scheduled","2027-01-31"],["Bologna",0,"Napoli",0,"Scheduled","2027-02-07"],["Cagliari",0,"Atalanta",0,"Scheduled","2027-02-07"],["Fiorentina",0,"Venezia",0,"Scheduled","2027-02-07"],["Frosinone",0,"Genoa",0,"Scheduled","2027-02-07"],["Juventus",0,"Sassuolo",0,"Scheduled","2027-02-07"],["Milan",0,"Lazio",0,"Scheduled","2027-02-07"],["Monza",0,"Lecce",0,"Scheduled","2027-02-07"],["Parma",0,"Como",0,"Scheduled","2027-02-07"],["Roma",0,"Torino",0,"Scheduled","2027-02-07"],["Udinese",0,"Inter",0,"Scheduled","2027-02-07"],["Atalanta",0,"Juventus",0,"Scheduled","2027-02-14"],["Cagliari",0,"Udinese",0,"Scheduled","2027-02-14"],["Como",0,"Frosinone",0,"Scheduled","2027-02-14"],["Genoa",0,"Parma",0,"Scheduled","2027-02-14"],["Inter",0,"Roma",0,"Scheduled","2027-02-14"],["Lazio",0,"Venezia",0,"Scheduled","2027-02-14"],["Lecce",0,"Milan",0,"Scheduled","2027-02-14"],["Napoli",0,"Fiorentina",0,"Scheduled","2027-02-14"],["Sassuolo",0,"Monza",0,"Scheduled","2027-02-14"],["Torino",0,"Bologna",0,"Scheduled","2027-02-14"],["Bologna",0,"Lecce",0,"Scheduled","2027-02-21"],["Fiorentina",0,"Genoa",0,"Scheduled","2027-02-21"],["Frosinone",0,"Napoli",0,"Scheduled","2027-02-21"],["Juventus",0,"Cagliari",0,"Scheduled","2027-02-21"],["Milan",0,"Sassuolo",0,"Scheduled","2027-02-21"],["Monza",0,"Lazio",0,"Scheduled","2027-02-21"],["Parma",0,"Inter",0,"Scheduled","2027-02-21"],["Roma",0,"Como",0,"Scheduled","2027-02-21"],["Udinese",0,"Torino",0,"Scheduled","2027-02-21"],["Venezia",0,"Atalanta",0,"Scheduled","2027-02-21"],["Atalanta",0,"Milan",0,"Scheduled","2027-02-28"],["Cagliari",0,"Monza",0,"Scheduled","2027-02-28"],["Como",0,"Fiorentina",0,"Scheduled","2027-02-28"],["Genoa",0,"Roma",0,"Scheduled","2027-02-28"],["Inter",0,"Bologna",0,"Scheduled","2027-02-28"],["Lazio",0,"Juventus",0,"Scheduled","2027-02-28"],["Lecce",0,"Udinese",0,"Scheduled","2027-02-28"],["Napoli",0,"Venezia",0,"Scheduled","2027-02-28"],["Sassuolo",0,"Frosinone",0,"Scheduled","2027-02-28"],["Torino",0,"Parma",0,"Scheduled","2027-02-28"],["Bologna",0,"Cagliari",0,"Scheduled","2027-03-07"],["Fiorentina",0,"Inter",0,"Scheduled","2027-03-07"],["Frosinone",0,"Atalanta",0,"Scheduled","2027-03-07"],["Juventus",0,"Lecce",0,"Scheduled","2027-03-07"],["Milan",0,"Udinese",0,"Scheduled","2027-03-07"],["Monza",0,"Torino",0,"Scheduled","2027-03-07"],["Parma",0,"Lazio",0,"Scheduled","2027-03-07"],["Roma",0,"Napoli",0,"Scheduled","2027-03-07"],["Sassuolo",0,"Como",0,"Scheduled","2027-03-07"],["Venezia",0,"Genoa",0,"Scheduled","2027-03-07"],["Atalanta",0,"Fiorentina",0,"Scheduled","2027-03-14"],["Bologna",0,"Milan",0,"Scheduled","2027-03-14"],["Cagliari",0,"Roma",0,"Scheduled","2027-03-14"],["Como",0,"Torino",0,"Scheduled","2027-03-14"],["Inter",0,"Venezia",0,"Scheduled","2027-03-14"],["Juventus",0,"Genoa",0,"Scheduled","2027-03-14"],["Lazio",0,"Sassuolo",0,"Scheduled","2027-03-14"],["Lecce",0,"Frosinone",0,"Scheduled","2027-03-14"],["Napoli",0,"Monza",0,"Scheduled","2027-03-14"],["Udinese",0,"Parma",0,"Scheduled","2027-03-14"],["Cagliari",0,"Lazio",0,"Scheduled","2027-03-21"],["Fiorentina",0,"Sassuolo",0,"Scheduled","2027-03-21"],["Genoa",0,"Lecce",0,"Scheduled","2027-03-21"],["Inter",0,"Milan",0,"Scheduled","2027-03-21"],["Monza",0,"Bologna",0,"Scheduled","2027-03-21"],["Napoli",0,"Juventus",0,"Scheduled","2027-03-21"],["Parma",0,"Atalanta",0,"Scheduled","2027-03-21"],["Roma",0,"Udinese",0,"Scheduled","2027-03-21"],["Torino",0,"Frosinone",0,"Scheduled","2027-03-21"],["Venezia",0,"Como",0,"Scheduled","2027-03-21"],["Atalanta",0,"Monza",0,"Scheduled","2027-04-04"],["Bologna",0,"Parma",0,"Scheduled","2027-04-04"],["Como",0,"Inter",0,"Scheduled","2027-04-04"],["Frosinone",0,"Cagliari",0,"Scheduled","2027-04-04"],["Juventus",0,"Fiorentina",0,"Scheduled","2027-04-04"],["Lazio",0,"Napoli",0,"Scheduled","2027-04-04"],["Lecce",0,"Torino",0,"Scheduled","2027-04-04"],["Milan",0,"Genoa",0,"Scheduled","2027-04-04"],["Sassuolo",0,"Roma",0,"Scheduled","2027-04-04"],["Udinese",0,"Venezia",0,"Scheduled","2027-04-04"],["Cagliari",0,"Como",0,"Scheduled","2027-04-11"],["Fiorentina",0,"Monza",0,"Scheduled","2027-04-11"],["Frosinone",0,"Milan",0,"Scheduled","2027-04-11"],["Genoa",0,"Sassuolo",0,"Scheduled","2027-04-11"],["Inter",0,"Atalanta",0,"Scheduled","2027-04-11"],["Lecce",0,"Lazio",0,"Scheduled","2027-04-11"],["Roma",0,"Parma",0,"Scheduled","2027-04-11"],["Torino",0,"Napoli",0,"Scheduled","2027-04-11"],["Udinese",0,"Bologna",0,"Scheduled","2027-04-11"],["Venezia",0,"Juventus",0,"Scheduled","2027-04-11"],["Atalanta",0,"Lecce",0,"Scheduled","2027-04-18"],["Bologna",0,"Venezia",0,"Scheduled","2027-04-18"],["Fiorentina",0,"Udinese",0,"Scheduled","2027-04-18"],["Genoa",0,"Inter",0,"Scheduled","2027-04-18"],["Juventus",0,"Como",0,"Scheduled","2027-04-18"],["Lazio",0,"Torino",0,"Scheduled","2027-04-18"],["Milan",0,"Cagliari",0,"Scheduled","2027-04-18"],["Monza",0,"Roma",0,"Scheduled","2027-04-18"],["Napoli",0,"Sassuolo",0,"Scheduled","2027-04-18"],["Parma",0,"Frosinone",0,"Scheduled","2027-04-18"],["Como",0,"Atalanta",0,"Scheduled","2027-04-25"],["Fiorentina",0,"Bologna",0,"Scheduled","2027-04-25"],["Genoa",0,"Cagliari",0,"Scheduled","2027-04-25"],["Inter",0,"Frosinone",0,"Scheduled","2027-04-25"],["Monza",0,"Juventus",0,"Scheduled","2027-04-25"],["Napoli",0,"Lecce",0,"Scheduled","2027-04-25"],["Parma",0,"Milan",0,"Scheduled","2027-04-25"],["Roma",0,"Lazio",0,"Scheduled","2027-04-25"],["Udinese",0,"Sassuolo",0,"Scheduled","2027-04-25"],["Venezia",0,"Torino",0,"Scheduled","2027-04-25"],["Como",0,"Bologna",0,"Scheduled","2027-05-02"],["Fiorentina",0,"Cagliari",0,"Scheduled","2027-05-02"],["Genoa",0,"Atalanta",0,"Scheduled","2027-05-02"],["Lazio",0,"Frosinone",0,"Scheduled","2027-05-02"],["Lecce",0,"Inter",0,"Scheduled","2027-05-02"],["Monza",0,"Milan",0,"Scheduled","2027-05-02"],["Sassuolo",0,"Parma",0,"Scheduled","2027-05-02"],["Torino",0,"Juventus",0,"Scheduled","2027-05-02"],["Udinese",0,"Napoli",0,"Scheduled","2027-05-02"],["Venezia",0,"Roma",0,"Scheduled","2027-05-02"],["Frosinone",0,"Bologna",0,"Scheduled","2027-05-09"],["Lazio",0,"Atalanta",0,"Scheduled","2027-05-09"],["Lecce",0,"Como",0,"Scheduled","2027-05-09"],["Monza",0,"Genoa",0,"Scheduled","2027-05-09"],["Napoli",0,"Cagliari",0,"Scheduled","2027-05-09"],["Parma",0,"Fiorentina",0,"Scheduled","2027-05-09"],["Roma",0,"Milan",0,"Scheduled","2027-05-09"],["Torino",0,"Inter",0,"Scheduled","2027-05-09"],["Udinese",0,"Juventus",0,"Scheduled","2027-05-09"],["Venezia",0,"Sassuolo",0,"Scheduled","2027-05-09"],["Genoa",0,"Bologna",0,"Scheduled","2027-05-16"],["Lazio",0,"Como",0,"Scheduled","2027-05-16"],["Milan",0,"Fiorentina",0,"Scheduled","2027-05-16"],["Napoli",0,"Atalanta",0,"Scheduled","2027-05-16"],["Parma",0,"Lecce",0,"Scheduled","2027-05-16"],["Roma",0,"Juventus",0,"Scheduled","2027-05-16"],["Sassuolo",0,"Inter",0,"Scheduled","2027-05-16"],["Torino",0,"Cagliari",0,"Scheduled","2027-05-16"],["Udinese",0,"Frosinone",0,"Scheduled","2027-05-16"],["Venezia",0,"Monza",0,"Scheduled","2027-05-16"],["Juventus",0,"Bologna",0,"Scheduled","2027-05-23"],["Lazio",0,"Inter",0,"Scheduled","2027-05-23"],["Lecce",0,"Fiorentina",0,"Scheduled","2027-05-23"],["Monza",0,"Como",0,"Scheduled","2027-05-23"],["Napoli",0,"Milan",0,"Scheduled","2027-05-23"],["Roma",0,"Frosinone",0,"Scheduled","2027-05-23"],["Sassuolo",0,"Cagliari",0,"Scheduled","2027-05-23"],["Torino",0,"Atalanta",0,"Scheduled","2027-05-23"],["Udinese",0,"Genoa",0,"Scheduled","2027-05-23"],["Venezia",0,"Parma",0,"Scheduled","2027-05-23"],["Juventus",0,"Inter",0,"Scheduled","2027-05-30"],["Lazio",0,"Fiorentina",0,"Scheduled","2027-05-30"],["Milan",0,"Como",0,"Scheduled","2027-05-30"],["Monza",0,"Frosinone",0,"Scheduled","2027-05-30"],["Parma",0,"Napoli",0,"Scheduled","2027-05-30"],["Roma",0,"Bologna",0,"Scheduled","2027-05-30"],["Sassuolo",0,"Lecce",0,"Scheduled","2027-05-30"],["Torino",0,"Genoa",0,"Scheduled","2027-05-30"],["Udinese",0,"Atalanta",0,"Scheduled","2027-05-30"],["Venezia",0,"Cagliari",0,"Scheduled","2027-05-30"]],"Bundesliga":[["Bayern Munich",5,"Stuttgart",1,"Final","2026-08-28"],["Mainz",0,"Paderborn",0,"Final","2026-08-29"],["Dortmund",2,"Hamburger SV",0,"Final","2026-08-29"],["RB Leipzig",3,"Mönchengladbach",0,"Final","2026-08-29"],["Union Berlin",3,"Frankfurt",3,"Final","2026-08-29"],["Köln",3,"Hoffenheim",2,"Final","2026-08-29"],["Elversberg",3,"Leverkusen",2,"Final","2026-08-29"],["Freiburg",4,"Werder Bremen",1,"Final","2026-08-30"],["Augsburg",3,"Schalke 04",0,"Final","2026-08-30"],["Stuttgart",4,"Köln",1,"Final","2026-09-04"],["Werder Bremen",3,"RB Leipzig",1,"Final","2026-09-05"],["Mönchengladbach",3,"Elversberg",4,"Final","2026-09-05"],["Hoffenheim",2,"Dortmund",3,"Final","2026-09-05"],["Leverkusen",4,"Union Berlin",0,"Final","2026-09-05"],["Schalke 04",0,"Bayern Munich",0,"Final","2026-09-05"],["Paderborn",0,"Freiburg",1,"Final","2026-09-05"],["Frankfurt",1,"Augsburg",4,"Final","2026-09-06"],["Hamburger SV",0,"Mainz",5,"Final","2026-09-06"],["Union Berlin",1,"Schalke 04",3,"Final","2026-09-11"],["Freiburg",5,"Mönchengladbach",0,"Final","2026-09-12"],["Mainz",1,"Frankfurt",3,"Final","2026-09-12"],["Dortmund",3,"Paderborn",0,"Final","2026-09-12"],["Hoffenheim",2,"Stuttgart",1,"Final","2026-09-12"],["Augsburg",2,"Leverkusen",2,"Final","2026-09-12"],["Köln",1,"Werder Bremen",1,"Final","2026-09-12"],["RB Leipzig",5,"Hamburger SV",0,"Final","2026-09-13"],["Elversberg",1,"Bayern Munich",2,"Final","2026-09-13"],["Bayern Munich",7,"Union Berlin",0,"Final","2026-09-18"],["Werder Bremen",3,"Augsburg",2,"Final","2026-09-19"],["Mönchengladbach",3,"Mainz",4,"Final","2026-09-19"],["Frankfurt",2,"Freiburg",2,"Final","2026-09-19"],["Stuttgart",0,"Dortmund",1,"Final","2026-09-19"],["Hamburger SV",2,"Köln",1,"Final","2026-09-19"],["Leverkusen",2,"RB Leipzig",0,"Final","2026-09-20"],["Schalke 04",0,"Elversberg",0,"Final","2026-09-20"],["Paderborn",3,"Hoffenheim",1,"Final","2026-09-20"],["Dortmund",2,"Werder Bremen",2,"Final","2026-10-09"],["Mainz",3,"Leverkusen",4,"Final","2026-10-10"],["Hoffenheim",2,"Hamburger SV",3,"Final","2026-10-10"],["Augsburg",2,"Bayern Munich",2,"Final","2026-10-10"],["RB Leipzig",6,"Frankfurt",0,"Final","2026-10-10"],["Union Berlin",1,"Elversberg",0,"Final","2026-10-10"],["Paderborn",0,"Stuttgart",2,"Final","2026-10-10"],["Freiburg",2,"Schalke 04",1,"Final","2026-10-11"],["Köln",2,"Mönchengladbach",1,"Final","2026-10-11"],["Frankfurt",1,"Köln",0,"Final","2026-10-16"],["Bayern Munich",6,"RB Leipzig",1,"Final","2026-10-17"],["Werder Bremen",2,"Paderborn",2,"Final","2026-10-17"],["Schalke 04",0,"Mainz",1,"Final","2026-10-17"],["Hamburger SV",1,"Stuttgart",0,"Final","2026-10-17"],["Union Berlin",0,"Dortmund",0,"Final","2026-10-17"],["Elversberg",4,"Augsburg",3,"Final","2026-10-17"],["Mönchengladbach",1,"Hoffenheim",2,"Final","2026-10-18"],["Leverkusen",2,"Freiburg",1,"Final","2026-10-18"],["Stuttgart",2,"Mönchengladbach",3,"Final","2026-10-23"],["Mainz",2,"Werder Bremen",3,"Final","2026-10-24"],["Dortmund",1,"Frankfurt",0,"Final","2026-10-24"],["Augsburg",1,"Union Berlin",1,"Final","2026-10-24"],["RB Leipzig",4,"Elversberg",0,"Final","2026-10-24"],["Paderborn",1,"Hamburger SV",0,"Final","2026-10-24"],["Köln",0,"Schalke 04",0,"Final","2026-10-24"],["Freiburg",1,"Bayern Munich",3,"Final","2026-10-25"],["Hoffenheim",3,"Leverkusen",0,"Final","2026-10-25"],["Elversberg",4,"Mainz",1,"Final","2026-10-30"],["Bayern Munich",2,"Dortmund",2,"Final","2026-10-31"],["Werder Bremen",2,"Hoffenheim",0,"Final","2026-10-31"],["Mönchengladbach",0,"Paderborn",0,"Final","2026-10-31"],["Leverkusen",2,"Stuttgart",4,"Final","2026-10-31"],["Augsburg",1,"Freiburg",2,"Final","2026-10-31"],["Schalke 04",0,"RB Leipzig",2,"Final","2026-10-31"],["Frankfurt",3,"Hamburger SV",1,"Final","2026-11-01"],["Union Berlin",1,"Köln",1,"Final","2026-11-01"],["Hamburger SV",3,"Mönchengladbach",1,"Final","2026-11-06"],["Mainz",1,"Bayern Munich",2,"Final","2026-11-07"],["Dortmund",2,"Elversberg",1,"Final","2026-11-07"],["Stuttgart",1,"Werder Bremen",0,"Final","2026-11-07"],["RB Leipzig",5,"Augsburg",2,"Final","2026-11-07"],["Paderborn",2,"Frankfurt",2,"Final","2026-11-07"],["Freiburg",2,"Union Berlin",0,"Final","2026-11-08"],["Hoffenheim",2,"Schalke 04",1,"Final","2026-11-08"],["Köln",1,"Leverkusen",2,"Final","2026-11-08"]],"Ligue1":[["Marseille",4,"Strasbourg",0,"Final","2026-08-21"],["Le Mans",2,"Brest",2,"Final","2026-08-22"],["Lens",5,"Auxerre",2,"Final","2026-08-22"],["Nice",0,"Lorient",0,"Final","2026-08-22"],["Paris Saint-Germain",0,"Rennes",0,"Scheduled","2026-08-22"],["Toulouse",0,"Lyon",2,"Final","2026-08-22"],["Troyes",0,"Paris FC",0,"Final","2026-08-22"],["Angers",0,"Lille",2,"Final","2026-08-23"],["Le Havre",0,"Monaco",1,"Final","2026-08-23"],["Rennes",2,"Paris Saint-Germain",2,"Final","2026-08-23"],["Lille",2,"Paris Saint-Germain",2,"Final","2026-08-28"],["Auxerre",1,"Angers",3,"Final","2026-08-29"],["Brest",2,"Toulouse",2,"Final","2026-08-29"],["Lorient",1,"Troyes",2,"Final","2026-08-29"],["Lyon",1,"Le Havre",1,"Final","2026-08-29"],["Strasbourg",2,"Lens",1,"Final","2026-08-29"],["Monaco",2,"Marseille",0,"Final","2026-08-30"],["Paris FC",3,"Nice",0,"Final","2026-08-30"],["Rennes",3,"Le Mans",2,"Final","2026-08-30"],["Toulouse",0,"Lille",1,"Final","2026-09-03"],["Lyon",3,"Auxerre",1,"Final","2026-09-04"],["Paris Saint-Germain",1,"Monaco",2,"Final","2026-09-04"],["Le Havre",1,"Brest",2,"Final","2026-09-05"],["Lens",0,"Lorient",1,"Final","2026-09-05"],["Nice",1,"Le Mans",1,"Final","2026-09-05"],["Angers",1,"Rennes",2,"Final","2026-09-06"],["Marseille",2,"Paris FC",3,"Final","2026-09-06"],["Troyes",2,"Strasbourg",6,"Final","2026-09-06"],["Rennes",1,"Marseille",0,"Final","2026-09-11"],["Auxerre",1,"Nice",0,"Final","2026-09-12"],["Le Havre",0,"Angers",0,"Final","2026-09-12"],["Lorient",2,"Toulouse",2,"Final","2026-09-12"],["Paris FC",0,"Lyon",0,"Final","2026-09-12"],["Strasbourg",1,"Monaco",1,"Final","2026-09-12"],["Brest",0,"Paris Saint-Germain",1,"Final","2026-09-13"],["Le Mans",2,"Lens",2,"Final","2026-09-13"],["Lille",2,"Troyes",0,"Final","2026-09-13"],["Monaco",2,"Lens",1,"Final","2026-09-18"],["Angers",2,"Troyes",0,"Final","2026-09-19"],["Le Mans",2,"Lorient",1,"Final","2026-09-19"],["Lyon",4,"Rennes",0,"Final","2026-09-19"],["Paris FC",2,"Strasbourg",1,"Final","2026-09-19"],["Toulouse",3,"Le Havre",2,"Final","2026-09-19"],["Auxerre",2,"Brest",1,"Final","2026-09-20"],["Marseille",1,"Paris Saint-Germain",2,"Final","2026-09-20"],["Nice",2,"Lille",1,"Final","2026-09-20"],["Lens",2,"Lyon",1,"Final","2026-10-09"],["Brest",5,"Angers",1,"Final","2026-10-10"],["Lille",1,"Le Havre",0,"Final","2026-10-10"],["Lorient",1,"Paris FC",0,"Final","2026-10-10"],["Monaco",2,"Toulouse",2,"Final","2026-10-10"],["Paris Saint-Germain",3,"Le Mans",1,"Final","2026-10-10"],["Nice",2,"Strasbourg",1,"Final","2026-10-11"],["Rennes",4,"Auxerre",1,"Final","2026-10-11"],["Troyes",0,"Marseille",2,"Final","2026-10-11"],["Le Mans",0,"Toulouse",3,"Final","2026-10-16"],["Lille",1,"Brest",1,"Final","2026-10-17"],["Strasbourg",1,"Paris Saint-Germain",3,"Final","2026-10-17"],["Troyes",1,"Lens",3,"Final","2026-10-17"],["Angers",2,"Marseille",5,"Final","2026-10-18"],["Le Havre",1,"Auxerre",3,"Final","2026-10-18"],["Lorient",1,"Monaco",0,"Final","2026-10-18"],["Lyon",2,"Nice",1,"Final","2026-10-18"],["Paris FC",4,"Rennes",3,"Final","2026-10-18"],["Brest",1,"Nice",2,"Final","2026-10-23"],["Lens",2,"Paris FC",1,"Final","2026-10-24"],["Angers",0,"Lorient",0,"Final","2026-10-25"],["Auxerre",1,"Le Mans",1,"Final","2026-10-25"],["Marseille",4,"Le Havre",3,"Final","2026-10-25"],["Monaco",1,"Lille",1,"Final","2026-10-25"],["Rennes",3,"Strasbourg",0,"Final","2026-10-25"],["Toulouse",0,"Troyes",0,"Final","2026-10-25"],["Paris Saint-Germain",2,"Lyon",0,"Final","2026-10-26"],["Le Havre",1,"Paris Saint-Germain",5,"Final","2026-10-30"],["Lille",1,"Lens",0,"Final","2026-10-30"],["Nice",5,"Rennes",2,"Final","2026-10-30"],["Troyes",2,"Le Mans",0,"Final","2026-10-31"],["Lyon",2,"Angers",0,"Final","2026-11-01"],["Marseille",2,"Toulouse",0,"Final","2026-11-01"],["Paris FC",3,"Monaco",1,"Final","2026-11-01"],["Strasbourg",5,"Auxerre",1,"Final","2026-11-01"],["Lorient",0,"Brest",2,"Final","2026-11-02"],["Toulouse",3,"Strasbourg",1,"Final","2026-11-06"],["Auxerre",0,"Paris FC",1,"Final","2026-11-07"],["Paris Saint-Germain",1,"Troyes",0,"Final","2026-11-07"],["Angers",0,"Nice",2,"Final","2026-11-08"],["Brest",2,"Lyon",0,"Final","2026-11-08"],["Le Havre",0,"Lorient",2,"Final","2026-11-08"],["Le Mans",1,"Monaco",1,"Final","2026-11-08"],["Lens",1,"Marseille",2,"Final","2026-11-08"],["Rennes",1,"Lille",2,"Final","2026-11-08"],["Lens",0,"Toulouse",0,"Scheduled","2026-11-21"],["Lille",0,"Lyon",0,"Scheduled","2026-11-21"],["Lorient",0,"Rennes",0,"Scheduled","2026-11-21"],["Marseille",0,"Le Mans",0,"Scheduled","2026-11-21"],["Monaco",0,"Auxerre",0,"Scheduled","2026-11-21"],["Nice",0,"Paris Saint-Germain",0,"Scheduled","2026-11-21"],["Paris FC",0,"Angers",0,"Scheduled","2026-11-21"],["Strasbourg",0,"Brest",0,"Scheduled","2026-11-21"],["Troyes",0,"Le Havre",0,"Scheduled","2026-11-21"],["Angers",0,"Lens",0,"Scheduled","2026-11-28"],["Auxerre",0,"Marseille",0,"Scheduled","2026-11-28"],["Brest",0,"Paris FC",0,"Scheduled","2026-11-28"],["Le Havre",0,"Strasbourg",0,"Scheduled","2026-11-28"],["Le Mans",0,"Lille",0,"Scheduled","2026-11-28"],["Lyon",0,"Monaco",0,"Scheduled","2026-11-28"],["Nice",0,"Troyes",0,"Scheduled","2026-11-28"],["Paris Saint-Germain",0,"Lorient",0,"Scheduled","2026-11-28"],["Toulouse",0,"Rennes",0,"Scheduled","2026-11-28"],["Lens",0,"Le Havre",0,"Scheduled","2026-12-05"],["Lille",0,"Auxerre",0,"Scheduled","2026-12-05"],["Marseille",0,"Nice",0,"Scheduled","2026-12-05"],["Monaco",0,"Angers",0,"Scheduled","2026-12-05"],["Paris FC",0,"Le Mans",0,"Scheduled","2026-12-05"],["Rennes",0,"Brest",0,"Scheduled","2026-12-05"],["Strasbourg",0,"Lorient",0,"Scheduled","2026-12-05"],["Toulouse",0,"Paris Saint-Germain",0,"Scheduled","2026-12-05"],["Troyes",0,"Lyon",0,"Scheduled","2026-12-05"],["Angers",0,"Strasbourg",0,"Scheduled","2026-12-12"],["Auxerre",0,"Toulouse",0,"Scheduled","2026-12-12"],["Brest",0,"Troyes",0,"Scheduled","2026-12-12"],["Le Havre",0,"Le Mans",0,"Scheduled","2026-12-12"],["Lorient",0,"Lille",0,"Scheduled","2026-12-12"],["Lyon",0,"Marseille",0,"Scheduled","2026-12-12"],["Nice",0,"Lens",0,"Scheduled","2026-12-12"],["Paris Saint-Germain",0,"Paris FC",0,"Scheduled","2026-12-12"],["Rennes",0,"Monaco",0,"Scheduled","2026-12-12"],["Brest",0,"Marseille",0,"Scheduled","2027-01-02"],["Le Mans",0,"Lyon",0,"Scheduled","2027-01-02"],["Lens",0,"Paris Saint-Germain",0,"Scheduled","2027-01-02"],["Lille",0,"Strasbourg",0,"Scheduled","2027-01-02"],["Lorient",0,"Auxerre",0,"Scheduled","2027-01-02"],["Monaco",0,"Nice",0,"Scheduled","2027-01-02"],["Paris FC",0,"Le Havre",0,"Scheduled","2027-01-02"],["Toulouse",0,"Angers",0,"Scheduled","2027-01-02"],["Troyes",0,"Rennes",0,"Scheduled","2027-01-02"],["Angers",0,"Paris Saint-Germain",0,"Scheduled","2027-01-16"],["Auxerre",0,"Troyes",0,"Scheduled","2027-01-16"],["Lyon",0,"Lorient",0,"Scheduled","2027-01-16"],["Marseille",0,"Lille",0,"Scheduled","2027-01-16"],["Monaco",0,"Brest",0,"Scheduled","2027-01-16"],["Nice",0,"Le Havre",0,"Scheduled","2027-01-16"],["Paris FC",0,"Toulouse",0,"Scheduled","2027-01-16"],["Rennes",0,"Lens",0,"Scheduled","2027-01-16"],["Strasbourg",0,"Le Mans",0,"Scheduled","2027-01-16"],["Le Havre",0,"Rennes",0,"Scheduled","2027-01-23"],["Le Mans",0,"Angers",0,"Scheduled","2027-01-23"],["Lens",0,"Brest",0,"Scheduled","2027-01-23"],["Lille",0,"Paris FC",0,"Scheduled","2027-01-23"],["Lorient",0,"Marseille",0,"Scheduled","2027-01-23"],["Paris Saint-Germain",0,"Auxerre",0,"Scheduled","2027-01-23"],["Strasbourg",0,"Lyon",0,"Scheduled","2027-01-23"],["Toulouse",0,"Nice",0,"Scheduled","2027-01-23"],["Troyes",0,"Monaco",0,"Scheduled","2027-01-23"],["Angers",0,"Le Havre",0,"Scheduled","2027-01-30"],["Brest",0,"Strasbourg",0,"Scheduled","2027-01-30"],["Le Mans",0,"Nice",0,"Scheduled","2027-01-30"],["Lyon",0,"Lille",0,"Scheduled","2027-01-30"],["Marseille",0,"Troyes",0,"Scheduled","2027-01-30"],["Monaco",0,"Paris Saint-Germain",0,"Scheduled","2027-01-30"],["Paris FC",0,"Auxerre",0,"Scheduled","2027-01-30"],["Rennes",0,"Lorient",0,"Scheduled","2027-01-30"],["Toulouse",0,"Lens",0,"Scheduled","2027-01-30"],["Auxerre",0,"Monaco",0,"Scheduled","2027-02-06"],["Le Havre",0,"Toulouse",0,"Scheduled","2027-02-06"],["Lens",0,"Angers",0,"Scheduled","2027-02-06"],["Lorient",0,"Le Mans",0,"Scheduled","2027-02-06"],["Nice",0,"Brest",0,"Scheduled","2027-02-06"],["Paris Saint-Germain",0,"Marseille",0,"Scheduled","2027-02-06"],["Rennes",0,"Lyon",0,"Scheduled","2027-02-06"],["Strasbourg",0,"Paris FC",0,"Scheduled","2027-02-06"],["Troyes",0,"Lille",0,"Scheduled","2027-02-06"],["Auxerre",0,"Strasbourg",0,"Scheduled","2027-02-13"],["Brest",0,"Rennes",0,"Scheduled","2027-02-13"],["Le Mans",0,"Paris Saint-Germain",0,"Scheduled","2027-02-13"],["Lille",0,"Nice",0,"Scheduled","2027-02-13"],["Lorient",0,"Le Havre",0,"Scheduled","2027-02-13"],["Lyon",0,"Lens",0,"Scheduled","2027-02-13"],["Marseille",0,"Angers",0,"Scheduled","2027-02-13"],["Paris FC",0,"Troyes",0,"Scheduled","2027-02-13"],["Toulouse",0,"Monaco",0,"Scheduled","2027-02-13"],["Angers",0,"Paris FC",0,"Scheduled","2027-02-20"],["Le Havre",0,"Lyon",0,"Scheduled","2027-02-20"],["Lens",0,"Troyes",0,"Scheduled","2027-02-20"],["Lille",0,"Lorient",0,"Scheduled","2027-02-20"],["Monaco",0,"Le Mans",0,"Scheduled","2027-02-20"],["Nice",0,"Auxerre",0,"Scheduled","2027-02-20"],["Paris Saint-Germain",0,"Brest",0,"Scheduled","2027-02-20"],["Rennes",0,"Toulouse",0,"Scheduled","2027-02-20"],["Strasbourg",0,"Marseille",0,"Scheduled","2027-02-20"],["Auxerre",0,"Lille",0,"Scheduled","2027-02-27"],["Brest",0,"Monaco",0,"Scheduled","2027-02-27"],["Le Mans",0,"Paris FC",0,"Scheduled","2027-02-27"],["Lorient",0,"Angers",0,"Scheduled","2027-02-27"],["Lyon",0,"Toulouse",0,"Scheduled","2027-02-27"],["Marseille",0,"Rennes",0,"Scheduled","2027-02-27"],["Paris Saint-Germain",0,"Lens",0,"Scheduled","2027-02-27"],["Strasbourg",0,"Le Havre",0,"Scheduled","2027-02-27"],["Troyes",0,"Nice",0,"Scheduled","2027-02-27"],["Angers",0,"Auxerre",0,"Scheduled","2027-03-06"],["Le Havre",0,"Nice",0,"Scheduled","2027-03-06"],["Lens",0,"Strasbourg",0,"Scheduled","2027-03-06"],["Lille",0,"Marseille",0,"Scheduled","2027-03-06"],["Monaco",0,"Lyon",0,"Scheduled","2027-03-06"],["Paris FC",0,"Brest",0,"Scheduled","2027-03-06"],["Toulouse",0,"Le Mans",0,"Scheduled","2027-03-06"],["Troyes",0,"Lorient",0,"Scheduled","2027-03-06"],["Auxerre",0,"Paris Saint-Germain",0,"Scheduled","2027-03-13"],["Brest",0,"Lille",0,"Scheduled","2027-03-13"],["Le Havre",0,"Lens",0,"Scheduled","2027-03-13"],["Le Mans",0,"Rennes",0,"Scheduled","2027-03-13"],["Lyon",0,"Troyes",0,"Scheduled","2027-03-13"],["Marseille",0,"Monaco",0,"Scheduled","2027-03-13"],["Nice",0,"Toulouse",0,"Scheduled","2027-03-13"],["Paris FC",0,"Lorient",0,"Scheduled","2027-03-13"],["Strasbourg",0,"Angers",0,"Scheduled","2027-03-13"],["Angers",0,"Le Mans",0,"Scheduled","2027-03-20"],["Lens",0,"Lille",0,"Scheduled","2027-03-20"],["Lorient",0,"Nice",0,"Scheduled","2027-03-20"],["Marseille",0,"Lyon",0,"Scheduled","2027-03-20"],["Monaco",0,"Le Havre",0,"Scheduled","2027-03-20"],["Paris Saint-Germain",0,"Strasbourg",0,"Scheduled","2027-03-20"],["Rennes",0,"Paris FC",0,"Scheduled","2027-03-20"],["Toulouse",0,"Brest",0,"Scheduled","2027-03-20"],["Troyes",0,"Auxerre",0,"Scheduled","2027-03-20"],["Angers",0,"Monaco",0,"Scheduled","2027-04-03"],["Auxerre",0,"Lens",0,"Scheduled","2027-04-03"],["Brest",0,"Lorient",0,"Scheduled","2027-04-03"],["Le Havre",0,"Troyes",0,"Scheduled","2027-04-03"],["Le Mans",0,"Marseille",0,"Scheduled","2027-04-03"],["Lille",0,"Rennes",0,"Scheduled","2027-04-03"],["Nice",0,"Lyon",0,"Scheduled","2027-04-03"],["Paris FC",0,"Paris Saint-Germain",0,"Scheduled","2027-04-03"],["Strasbourg",0,"Toulouse",0,"Scheduled","2027-04-03"],["Le Mans",0,"Auxerre",0,"Scheduled","2027-04-10"],["Lille",0,"Toulouse",0,"Scheduled","2027-04-10"],["Lorient",0,"Lens",0,"Scheduled","2027-04-10"],["Lyon",0,"Strasbourg",0,"Scheduled","2027-04-10"],["Marseille",0,"Brest",0,"Scheduled","2027-04-10"],["Monaco",0,"Rennes",0,"Scheduled","2027-04-10"],["Nice",0,"Paris FC",0,"Scheduled","2027-04-10"],["Paris Saint-Germain",0,"Le Havre",0,"Scheduled","2027-04-10"],["Troyes",0,"Angers",0,"Scheduled","2027-04-10"],["Angers",0,"Lyon",0,"Scheduled","2027-04-17"],["Auxerre",0,"Lorient",0,"Scheduled","2027-04-17"],["Brest",0,"Le Mans",0,"Scheduled","2027-04-17"],["Le Havre",0,"Marseille",0,"Scheduled","2027-04-17"],["Lens",0,"Nice",0,"Scheduled","2027-04-17"],["Monaco",0,"Strasbourg",0,"Scheduled","2027-04-17"],["Paris Saint-Germain",0,"Lille",0,"Scheduled","2027-04-17"],["Rennes",0,"Troyes",0,"Scheduled","2027-04-17"],["Toulouse",0,"Paris FC",0,"Scheduled","2027-04-17"],["Le Mans",0,"Le Havre",0,"Scheduled","2027-04-24"],["Lille",0,"Monaco",0,"Scheduled","2027-04-24"],["Lorient",0,"Paris Saint-Germain",0,"Scheduled","2027-04-24"],["Lyon",0,"Brest",0,"Scheduled","2027-04-24"],["Marseille",0,"Auxerre",0,"Scheduled","2027-04-24"],["Nice",0,"Angers",0,"Scheduled","2027-04-24"],["Paris FC",0,"Lens",0,"Scheduled","2027-04-24"],["Strasbourg",0,"Rennes",0,"Scheduled","2027-04-24"],["Troyes",0,"Toulouse",0,"Scheduled","2027-04-24"],["Auxerre",0,"Lyon",0,"Scheduled","2027-05-01"],["Le Havre",0,"Paris FC",0,"Scheduled","2027-05-01"],["Lens",0,"Le Mans",0,"Scheduled","2027-05-01"],["Monaco",0,"Lorient",0,"Scheduled","2027-05-01"],["Paris Saint-Germain",0,"Angers",0,"Scheduled","2027-05-01"],["Rennes",0,"Nice",0,"Scheduled","2027-05-01"],["Strasbourg",0,"Lille",0,"Scheduled","2027-05-01"],["Toulouse",0,"Marseille",0,"Scheduled","2027-05-01"],["Troyes",0,"Brest",0,"Scheduled","2027-05-01"],["Angers",0,"Toulouse",0,"Scheduled","2027-05-08"],["Brest",0,"Auxerre",0,"Scheduled","2027-05-08"],["Le Mans",0,"Troyes",0,"Scheduled","2027-05-08"],["Lens",0,"Monaco",0,"Scheduled","2027-05-08"],["Lorient",0,"Strasbourg",0,"Scheduled","2027-05-08"],["Lyon",0,"Paris Saint-Germain",0,"Scheduled","2027-05-08"],["Nice",0,"Marseille",0,"Scheduled","2027-05-08"],["Paris FC",0,"Lille",0,"Scheduled","2027-05-08"],["Rennes",0,"Le Havre",0,"Scheduled","2027-05-08"],["Auxerre",0,"Rennes",0,"Scheduled","2027-05-16"],["Brest",0,"Le Havre",0,"Scheduled","2027-05-16"],["Lille",0,"Angers",0,"Scheduled","2027-05-16"],["Lyon",0,"Le Mans",0,"Scheduled","2027-05-16"],["Marseille",0,"Lens",0,"Scheduled","2027-05-16"],["Monaco",0,"Paris FC",0,"Scheduled","2027-05-16"],["Paris Saint-Germain",0,"Nice",0,"Scheduled","2027-05-16"],["Strasbourg",0,"Troyes",0,"Scheduled","2027-05-16"],["Toulouse",0,"Lorient",0,"Scheduled","2027-05-16"],["Angers",0,"Brest",0,"Scheduled","2027-05-22"],["Le Havre",0,"Lille",0,"Scheduled","2027-05-22"],["Le Mans",0,"Strasbourg",0,"Scheduled","2027-05-22"],["Lens",0,"Rennes",0,"Scheduled","2027-05-22"],["Lorient",0,"Lyon",0,"Scheduled","2027-05-22"],["Nice",0,"Monaco",0,"Scheduled","2027-05-22"],["Paris FC",0,"Marseille",0,"Scheduled","2027-05-22"],["Toulouse",0,"Auxerre",0,"Scheduled","2027-05-22"],["Troyes",0,"Paris Saint-Germain",0,"Scheduled","2027-05-22"],["Auxerre",0,"Le Havre",0,"Scheduled","2027-05-29"],["Brest",0,"Lens",0,"Scheduled","2027-05-29"],["Lille",0,"Le Mans",0,"Scheduled","2027-05-29"],["Lyon",0,"Paris FC",0,"Scheduled","2027-05-29"],["Marseille",0,"Lorient",0,"Scheduled","2027-05-29"],["Monaco",0,"Troyes",0,"Scheduled","2027-05-29"],["Paris Saint-Germain",0,"Toulouse",0,"Scheduled","2027-05-29"],["Rennes",0,"Angers",0,"Scheduled","2027-05-29"],["Strasbourg",0,"Nice",0,"Scheduled","2027-05-29"]],"NFL":[["New York Giants",21,"Washington Commanders",24,"Final","2026-11-13"],["Detroit Lions",0,"New England Patriots",0,"Scheduled","2026-11-15"],["Atlanta Falcons",0,"Kansas City Chiefs",0,"Scheduled","2026-11-15"],["Cleveland Browns",0,"Houston Texans",0,"Scheduled","2026-11-15"],["Green Bay Packers",0,"Minnesota Vikings",0,"Scheduled","2026-11-15"],["Tennessee Titans",0,"Jacksonville Jaguars",0,"Scheduled","2026-11-15"],["Indianapolis Colts",0,"Miami Dolphins",0,"Scheduled","2026-11-15"],["New Orleans Saints",0,"Carolina Panthers",0,"Scheduled","2026-11-15"],["New York Jets",0,"Buffalo Bills",0,"Scheduled","2026-11-15"],["Las Vegas Raiders",0,"Seattle Seahawks",0,"Scheduled","2026-11-15"],["Arizona Cardinals",0,"Los Angeles Rams",0,"Scheduled","2026-11-15"],["Dallas Cowboys",0,"San Francisco 49ers",0,"Scheduled","2026-11-15"],["Cincinnati Bengals",0,"Pittsburgh Steelers",0,"Scheduled","2026-11-16"],["Baltimore Ravens",0,"Los Angeles Chargers",0,"Scheduled","2026-11-17"]],"NBA":[["New Orleans Pelicans",64,"Denver Nuggets",74,"Live","2026-11-15"],["Cleveland Cavaliers",68,"Dallas Mavericks",53,"Live","2026-11-15"],["Miami Heat",27,"Detroit Pistons",28,"Live","2026-11-15"],["Memphis Grizzlies",38,"Brooklyn Nets",22,"Live","2026-11-15"],["Minnesota Timberwolves",17,"Chicago Bulls",29,"Scheduled","2026-11-15"]],"MLB":[["New York Yankees",2,"Tampa Bay Rays",0,"Final","2026-09-22"],["New York Yankees",1,"Tampa Bay Rays",6,"Final","2026-09-22"],["Detroit Tigers",1,"Washington Nationals",3,"Final","2026-09-22"],["Pittsburgh Pirates",2,"St. Louis Cardinals",0,"Final","2026-09-22"],["Philadelphia Phillies",6,"Milwaukee Brewers",4,"Final","2026-09-22"],["Boston Red Sox",2,"Cleveland Guardians",3,"Final","2026-09-22"]]};;// 2) DATOS 2026-27 (estructura estilo Linemate/OpticOdds)
+// ============================================================
+// Cuotas decimales derivadas del ranking/rendimiento real de cada equipo.
+// Cada evento lleva fecha real del calendario 2026-27.
+// FEED_DATA se genera dinámicamente desde RESULTADOS_REALES_LM (datos reales).
+// Todas las ligas (NFL, NBA, MLB, LaLiga, Premier, SerieA, Bundesliga, Ligue1)
+// usan los partidos reales del calendario oficial. Las cuotas se estiman con
+// un modelo simple basado en la fuerza relativa de los equipos (rating Elo-like
+// derivado del histórico de goles/puntos).
+const EQUIPO_RATING_LM = (function() {
+  // Calcula un rating por equipo a partir de RESULTADOS_REALES_LM (goles/puntos a favor - en contra).
+  const ratings = {};
+  const counts = {};
+  Object.keys(RESULTADOS_REALES_LM).forEach(lg => {
+    RESULTADOS_REALES_LM[lg].forEach(m => {
+      const [home, hs, away, as] = m;
+      const diff = hs - as;
+      // Fútbol: 1 punto por gol de diferencia. Béisbol/NFL/NBA: escalado.
+      const esc = (lg === 'NBA') ? 0.1 : (lg === 'NFL' ? 0.5 : 1);
+      if (!ratings[home]) { ratings[home] = 0; counts[home] = 0; }
+      if (!ratings[away]) { ratings[away] = 0; counts[away] = 0; }
+      ratings[home] += diff * esc;
+      ratings[away] -= diff * esc;
+      counts[home]++; counts[away]++;
+    });
+  });
+  // Normalizar por partidos jugados
+  Object.keys(ratings).forEach(t => { if (counts[t] > 0) ratings[t] /= counts[t]; });
+  return ratings;
+})();
+
+// Probabilidad implícita → cuota decimal con margen (overround ~5%)
+function cuotaDesdeProb(prob, overround) {
+  overround = overround || 0.05;
+  const p = Math.max(0.02, Math.min(0.98, prob * (1 - overround)));
+  return Math.round((1 / p) * 100) / 100;
+}
+
+// Genera markets para fútbol (1X2, Over/Under 2.5, BTTS) desde ratings
+function marketsFutbol(home, away) {
+  const rH = EQUIPO_RATING_LM[home] || 0;
+  const rA = EQUIPO_RATING_LM[away] || 0;
+  const diff = rH - rA + 0.3; // ventaja local
+  // Modelo logit simple → P(1), P(X), P(2)
+  const p1 = 1 / (1 + Math.exp(-diff * 0.35));
+  const p2 = 1 / (1 + Math.exp(diff * 0.35));
+  let pX = Math.max(0.15, 1 - p1 - p2 - 0.05);
+  const suma = p1 + pX + p2;
+  const n1 = p1 / suma, nX = pX / suma, n2 = p2 / suma;
+  // Over 2.5: depende de goles esperados (rating absoluto)
+  const golesEsp = Math.max(2.0, 2.4 + (rH + rA) * 0.15);
+  const pOver = Math.min(0.85, Math.max(0.15, (golesEsp - 2.5) * 0.6 + 0.5));
+  const pBtts = Math.min(0.85, Math.max(0.15, 0.5 + (golesEsp - 2.5) * 0.2));
+  return [
+    { name: "Moneyline", selections: [
+      { name: "Gana " + home, decimalOdds: cuotaDesdeProb(n1, 0.05) },
+      { name: "Empate", decimalOdds: cuotaDesdeProb(nX, 0.05) },
+      { name: "Gana " + away, decimalOdds: cuotaDesdeProb(n2, 0.05) }
+    ]},
+    { name: "Over/Under 2.5", selections: [
+      { name: "Over 2.5", decimalOdds: cuotaDesdeProb(pOver, 0.05) },
+      { name: "Under 2.5", decimalOdds: cuotaDesdeProb(1 - pOver, 0.05) }
+    ]},
+    { name: "BTTS", selections: [
+      { name: "Sí", decimalOdds: cuotaDesdeProb(pBtts, 0.05) },
+      { name: "No", decimalOdds: cuotaDesdeProb(1 - pBtts, 0.05) }
+    ]}
+  ];
+}
+
+// Genera markets para MLB (Moneyline, Run Line, Total)
+function marketsMLB(home, away) {
+  const rH = EQUIPO_RATING_LM[home] || 0;
+  const rA = EQUIPO_RATING_LM[away] || 0;
+  const diff = rH - rA + 0.15; // ventaja local pequeña
+  const p1 = 1 / (1 + Math.exp(-diff * 0.3));
+  const p2 = 1 - p1;
+  const pOver = 0.5; // ~8.5 carreras totales
+  return [
+    { name: "Moneyline", selections: [
+      { name: home, decimalOdds: cuotaDesdeProb(p1, 0.05) },
+      { name: away, decimalOdds: cuotaDesdeProb(p2, 0.05) }
+    ]},
+    { name: "Run Line", selections: [
+      { name: home + " -1.5", decimalOdds: cuotaDesdeProb(p1 * 0.6, 0.05) },
+      { name: away + " +1.5", decimalOdds: cuotaDesdeProb(1 - p1 * 0.6, 0.05) }
+    ]},
+    { name: "Total", selections: [
+      { name: "Over 7.5", decimalOdds: cuotaDesdeProb(pOver, 0.05) },
+      { name: "Under 7.5", decimalOdds: cuotaDesdeProb(1 - pOver, 0.05) }
+    ]}
+  ];
+}
+
+// Genera markets para NFL (Moneyline, Spread, Total)
+function marketsNFL(home, away) {
+  const rH = EQUIPO_RATING_LM[home] || 0;
+  const rA = EQUIPO_RATING_LM[away] || 0;
+  const diff = rH - rA + 1.0; // ventaja local NFL
+  const p1 = 1 / (1 + Math.exp(-diff * 0.25));
+  const p2 = 1 - p1;
+  const pOver = 0.5;
+  return [
+    { name: "Moneyline", selections: [
+      { name: home, decimalOdds: cuotaDesdeProb(p1, 0.05) },
+      { name: away, decimalOdds: cuotaDesdeProb(p2, 0.05) }
+    ]},
+    { name: "Spread", selections: [
+      { name: home + " -2.5", decimalOdds: 1.91 },
+      { name: away + " +2.5", decimalOdds: 1.91 }
+    ]},
+    { name: "Total", selections: [
+      { name: "Over 47.5", decimalOdds: cuotaDesdeProb(pOver, 0.05) },
+      { name: "Under 47.5", decimalOdds: cuotaDesdeProb(1 - pOver, 0.05) }
+    ]}
+  ];
+}
+
+// Genera markets para NBA (Moneyline, Spread, Total)
+function marketsNBA(home, away) {
+  const rH = EQUIPO_RATING_LM[home] || 0;
+  const rA = EQUIPO_RATING_LM[away] || 0;
+  const diff = rH - rA + 1.5; // ventaja local NBA
+  const p1 = 1 / (1 + Math.exp(-diff * 0.3));
+  const p2 = 1 - p1;
+  const pOver = 0.5;
+  return [
+    { name: "Moneyline", selections: [
+      { name: home, decimalOdds: cuotaDesdeProb(p1, 0.05) },
+      { name: away, decimalOdds: cuotaDesdeProb(p2, 0.05) }
+    ]},
+    { name: "Spread", selections: [
+      { name: home + " -2.5", decimalOdds: 1.91 },
+      { name: away + " +2.5", decimalOdds: 1.91 }
+    ]},
+    { name: "Total", selections: [
+      { name: "Over 220.5", decimalOdds: cuotaDesdeProb(pOver, 0.05) },
+      { name: "Under 220.5", decimalOdds: cuotaDesdeProb(1 - pOver, 0.05) }
+    ]}
+  ];
+}
+
+const FEED_DATA = (function() {
+  const out = [];
+  const LIGAS_DEPORTE = {
+    'LaLiga': 'futbol', 'Premier': 'futbol', 'SerieA': 'futbol',
+    'Bundesliga': 'futbol', 'Ligue1': 'futbol',
+    'MLB': 'mlb', 'NFL': 'nfl', 'NBA': 'nba'
+  };
+  Object.keys(RESULTADOS_REALES_LM).forEach(lg => {
+    const deporte = LIGAS_DEPORTE[lg] || 'futbol';
+    RESULTADOS_REALES_LM[lg].forEach(m => {
+      const [home, hs, away, as, status, date] = m;
+      const markets = deporte === 'mlb' ? marketsMLB(home, away)
+        : deporte === 'nfl' ? marketsNFL(home, away)
+        : deporte === 'nba' ? marketsNBA(home, away)
+        : marketsFutbol(home, away);
+      out.push({
+        event: home + " vs " + away,
+        league: lg,
+        date: date,
+        status: status,
+        markets: markets
+      });
+    });
+  });
+  return out;
+})();
+
+
+const LEAGUES_INFO = {
+  NFL:       { label: 'NFL (fútbol americano)',      orden: 1 },
+  NBA:       { label: 'NBA (baloncesto)',            orden: 2 },
+  MLB:       { label: 'MLB (béisbol)',               orden: 3 },
+  LaLiga:    { label: 'LaLiga (España)',             orden: 4 },
+  Premier:   { label: 'Premier League (Inglaterra)', orden: 5 },
+  SerieA:    { label: 'Serie A (Italia)',            orden: 6 },
+  Bundesliga:{ label: 'Bundesliga (Alemania)',       orden: 7 },
+  Ligue1:    { label: 'Ligue 1 (Francia)',           orden: 8 }
+};
+
+// ============================================================
+// 3) ESTADO
+// ============================================================
+let selectedLegs = []; // { event, date, league, market, selection, decimalOdds }
+let activeLeague = 'ALL';
+let activeDay = ''; // fecha ISO del día seleccionado ('' = todos)
+
+// Devuelve los eventos del feed filtrados por liga activa y día activo
+function eventosActivos(extraFilter) {
+  return FEED_DATA.filter(e => {
+    if (activeLeague !== 'ALL' && e.league !== activeLeague) return false;
+    if (activeDay && e.date !== activeDay) return false;
+    if (extraFilter && !extraFilter(e)) return false;
+    return true;
+  });
+}
+
+// ============================================================
+// 4) REFERENCIAS DOM
+// ============================================================
+const $ = (id) => document.getElementById(id);
+const feedGrid = $('feedGrid');
+const leagueTabs = $('leagueTabs');
+const marketFilter = $('marketFilter');
+const autoParlayBtn = $('autoParlayBtn');
+const legsContainer = $('legsContainer');
+const clearLegsBtn = $('clearLegsBtn');
+const calcBtn = $('calcBtn');
+const stakeInput = $('stake');
+
+// ============================================================
+// 5) RENDER TABS DE LIGA
+// ============================================================
+function renderTabs() {
+  const leagues = Object.keys(LEAGUES_INFO).sort((a,b)=>LEAGUES_INFO[a].orden-LEAGUES_INFO[b].orden);
+  leagueTabs.innerHTML = '';
+  const allTab = document.createElement('button');
+  allTab.className = 'tab' + (activeLeague === 'ALL' ? ' active' : '');
+  allTab.textContent = 'Todas';
+  allTab.onclick = () => { activeLeague = 'ALL'; updateDayFilter(); renderTabs(); renderFeed(); updateMarketFilter(); renderResults(); };
+  leagueTabs.appendChild(allTab);
+  leagues.forEach(code => {
+    const t = document.createElement('button');
+    t.className = 'tab' + (activeLeague === code ? ' active' : '');
+    t.textContent = code;
+    t.onclick = () => { activeLeague = code; updateDayFilter(); renderTabs(); renderFeed(); updateMarketFilter(); renderResults(); };
+    leagueTabs.appendChild(t);
+  });
+}
+
+// Actualiza el selector de días según la liga activa (basado en las fechas de FEED_DATA)
+function updateDayFilter() {
+  const sel = $('dayFilter');
+  if (!sel) return;
+  // Recoger fechas únicas del feed filtrado por liga activa
+  const eventos = FEED_DATA.filter(e => activeLeague === 'ALL' || e.league === activeLeague);
+  const fechas = [...new Set(eventos.map(e => e.date))].sort();
+  // Guardar valor actual
+  const prev = activeDay;
+  sel.innerHTML = '<option value="">Todos los días</option>';
+  fechas.forEach(f => {
+    const o = document.createElement('option');
+    o.value = f;
+    // Formatear fecha
+    const d = new Date(f + 'T00:00:00');
+    const dias = ['dom','lun','mar','mié','jue','vie','sáb'];
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const n = eventos.filter(e => e.date === f).length;
+    o.textContent = `${dias[d.getDay()]} ${d.getDate()}-${meses[d.getMonth()]} · ${n} evento(s)`;
+    sel.appendChild(o);
+  });
+  // Selección por defecto: el día ACTUAL (cambia diariamente).
+  // - Si la selección previa sigue siendo válida (usuario la cambió manualmente) → se mantiene.
+  // - Si no: hoy si hay eventos → hoy; si no → próximo día con eventos; si todos pasaron → último día.
+  //   Nunca "todos" por defecto: el usuario quiere ver el día actual al abrir.
+  if (prev && fechas.includes(prev)) {
+    sel.value = prev;
+  } else {
+    const ahora = new Date();
+    const hoyISO = `${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,'0')}-${String(ahora.getDate()).padStart(2,'0')}`;
+    let diaDefecto = '';
+    if (fechas.indexOf(hoyISO) >= 0) {
+      diaDefecto = hoyISO;
+    } else {
+      const futuros = fechas.filter(f => f >= hoyISO);
+      diaDefecto = futuros.length > 0 ? futuros[0] : (fechas.length > 0 ? fechas[fechas.length - 1] : '');
+    }
+    activeDay = diaDefecto;
+    sel.value = diaDefecto;
+  }
+  sel.onchange = () => { activeDay = sel.value; renderFeed(); renderResults(); verificarParley(); };
+}
+
+function updateMarketFilter() {
+  const eventos = eventosActivos();
+  const mercados = new Set();
+  eventos.forEach(ev => ev.markets.forEach(m => mercados.add(m.name)));
+  marketFilter.innerHTML = '<option value="">Todos</option>';
+  Array.from(mercados).sort().forEach(m => {
+    const o = document.createElement('option');
+    o.value = m; o.textContent = m;
+    marketFilter.appendChild(o);
+  });
+}
+
+// ============================================================
+// 6) RENDER FEED
+// ============================================================
+function renderFeed() {
+  feedGrid.innerHTML = '';
+  const filtro = marketFilter.value;
+  const eventos = eventosActivos(e => !filtro || e.markets.some(m => m.name === filtro));
+  if (eventos.length === 0) {
+    feedGrid.innerHTML = '<p style="color:var(--muted);">No hay eventos con el filtro actual.</p>';
+    return;
+  }
+  eventos.forEach(event => {
+    const card = document.createElement('div');
+    card.className = 'feed-item';
+    card.innerHTML = `
+      <h4>${event.event}</h4>
+      <div class="meta">${LEAGUES_INFO[event.league]?.label || event.league} · <span class="date">📅 ${event.date}</span></div>
+    `;
+    event.markets.forEach(market => {
+      if (filtro && market.name !== filtro) return;
+      const block = document.createElement('div');
+      block.className = 'market-block';
+      block.innerHTML = `<div class="market-label">${market.name}</div>`;
+      market.selections.forEach(sel => {
+        const row = document.createElement('div');
+        row.className = 'odds-row';
+        const amer = decimalToAmerican(sel.decimalOdds);
+        const amerClass = amer.startsWith('-') ? 'neg' : '';
+        const probReal = realProb(sel.decimalOdds, market);
+        const ya = selectedLegs.some(l =>
+          l.event === event.event && l.market === market.name && l.selection === sel.name
+        );
+        row.innerHTML = `
+          <span class="sel"><strong>${sel.name}</strong> <span class="amer">(${amer}) · real ${fmt(probReal,1)}%</span></span>
+          <span>
+            <span class="price ${amerClass}">${fmt(sel.decimalOdds,2)}</span>
+            <button class="add-leg" ${ya ? 'disabled' : ''}>+ Añadir</button>
+          </span>
+        `;
+        row.querySelector('.add-leg').addEventListener('click', () => {
+          addLegToParlay({
+            event: event.event, date: event.date, league: event.league,
+            market: market.name, marketRef: market,
+            selection: sel.name, decimalOdds: sel.decimalOdds
+          });
+        });
+        block.appendChild(row);
+      });
+      card.appendChild(block);
+    });
+    feedGrid.appendChild(card);
+  });
+}
+
+// ============================================================
+// 7) LEGS (FIX DEL BUG ORIGINAL)
+// ============================================================
+function addLegToParlay(leg) {
+  // Evitar duplicados exactos
+  const exists = selectedLegs.some(l =>
+    l.event === leg.event && l.market === leg.market && l.selection === leg.selection
+  );
+  if (exists) { showError('Ese leg ya está en el parley.'); return; }
+  if (leg.decimalOdds <= 1) { showError('La cuota decimal debe ser mayor que 1.'); return; }
+  selectedLegs.push(leg);
+  renderLegs();
+  clearError();
+}
+
+function renderLegs() {
+  legsContainer.innerHTML = '';
+  if (selectedLegs.length === 0) {
+    legsContainer.innerHTML = '<p style="color:var(--muted); font-size:.9rem; padding:.5rem 0;">Aún no has añadido ningún leg. Selecciona cuotas del feed de arriba.</p>';
+    clearResults();
+    return;
+  }
+  selectedLegs.forEach((leg, idx) => {
+    const probImp = impliedProb(leg.decimalOdds);
+    const probReal = realProb(leg.decimalOdds, leg.marketRef);
+    const amer = decimalToAmerican(leg.decimalOdds);
+    const row = document.createElement('div');
+    row.className = 'leg';
+    row.innerHTML = `
+      <span class="info">
+        <strong>${leg.selection}</strong>
+        <span class="ev">${leg.event} · ${leg.market}</span>
+        <span class="date">📅 ${leg.date}</span>
+      </span>
+      <span>${fmt(leg.decimalOdds,2)} <span style="font-size:.68rem;color:var(--muted)">(${amer})</span></span>
+      <span class="prob">${fmt(probReal,1)}%<span class="real">impl. ${fmt(probImp,1)}%</span></span>
+      <button class="remove" title="Eliminar">✕</button>
+    `;
+    row.querySelector('.remove').addEventListener('click', () => {
+      selectedLegs.splice(idx, 1);
+      renderLegs();
+      renderFeed(); // refresca estado "disabled" del botón
+    });
+    legsContainer.appendChild(row);
+  });
+  clearResults();
+}
+
+// ============================================================
+// 8) CALCULAR PARLEY
+// ============================================================
+function calculateParlay() {
+  if (selectedLegs.length < 2) { showError('Un parley necesita al menos 2 legs.'); clearResults(); return; }
+  const stake = parseFloat(stakeInput.value) || 0;
+  if (stake <= 0) { showError('El stake debe ser mayor que 0.'); clearResults(); return; }
+
+  let combinedDecimal = 1;
+  let combinedProbVig = 1;     // con vig (suma de inversas)
+  let combinedProbReal = 1;   // sin vig (asumiendo independencia)
+  for (const leg of selectedLegs) {
+    combinedDecimal *= leg.decimalOdds;
+    combinedProbVig *= 1 / leg.decimalOdds;
+    combinedProbReal *= realProb(leg.decimalOdds, leg.marketRef) / 100;
+  }
+  const payout = stake * combinedDecimal;
+  const profit = payout - stake;
+  const roi = stake > 0 ? (profit / stake) * 100 : 0;
+
+  $('combinedOdds').innerHTML = `${fmt(combinedDecimal,2)} <span style="font-size:.85rem;color:var(--muted)">(${decimalToAmerican(combinedDecimal)})</span>`;
+  $('combinedProbVig').textContent = fmt(combinedProbVig * 100, 2) + '%';
+  $('combinedProbReal').textContent = fmt(combinedProbReal * 100, 2) + '%';
+  $('potentialPayout').textContent = fmt(payout, 2);
+  $('netProfit').textContent = (profit >= 0 ? '+' : '') + fmt(profit, 2);
+  $('roi').textContent = (roi >= 0 ? '+' : '') + fmt(roi, 1) + '%';
+  clearError();
+}
+
+function clearResults() {
+  $('combinedOdds').textContent = '—';
+  $('combinedProbVig').textContent = '—';
+  $('combinedProbReal').textContent = '—';
+  $('potentialPayout').textContent = '—';
+  $('netProfit').textContent = '—';
+  $('roi').textContent = '—';
+}
+function showError(msg) { $('errorMsg').textContent = msg; }
+function clearError() { $('errorMsg').textContent = ''; }
+
+// ============================================================
+// 9) AUTO-PARLEY (genera parley basado en cálculos de probabilidad de ganar)
+//    ESTRATEGIA:
+//    1) Para cada evento: calcula probReal (sin vig), EV y valueEdge de
+//       CADA selección y elige la de MAYOR probabilidad real con EV >= -0.15.
+//    2) Ordena candidatos por probReal desc.
+//    3) Evalúa todas las combinaciones de N legs (2,3,4) y elige la de
+//       mejor EV combinado ajustado por correlación (ρ = 0.15).
+//    4) Calcula P(acierto parley), cuota combinada, Kelly fraccional y ROI.
+// ============================================================
+
+// Factor de correlación positiva entre legs (misma liga/día)
+const RHO_PARLAY = 0.15;
+
+// Para un subconjunto de picks, calcula métricas combinadas
+function evaluarCombinacion(picks) {
+  let cuotaComb = 1, pIndep = 1;
+  for (const p of picks) {
+    cuotaComb *= p.decimalOdds;
+    pIndep *= p.probReal / 100; // probReal viene en %
+  }
+  // Ajuste por correlación: P_adj = P_indep - rho * P_indep * (1 - P_indep)
+  const pAdj = Math.max(0, pIndep - RHO_PARLAY * pIndep * (1 - pIndep));
+  const evComb = pAdj * cuotaComb - 1;
+  // Kelly fraccional (¼ Kelly, cap 5%)
+  const b = cuotaComb - 1;
+  let kellyFull = b > 0 ? (pAdj * b - (1 - pAdj)) / b : -1;
+  let fracc = Math.max(0, kellyFull) * 0.25;
+  if (fracc > 0.05) fracc = 0.05;
+  // Value edge medio (probReal y probImplied ambos en %)
+  const vEdgeMedio = picks.reduce((s, p) => s + (p.probReal - p.probImplied), 0) / picks.length;
+  return {
+    picks, cuotaCombinada: cuotaComb, probIndependiente: pIndep,
+    probAjustada: pAdj, evCombinado: evComb,
+    kellyFracc: fracc, valueEdgeMedio: vEdgeMedio
+  };
+}
+
+function autoParlay(numLegs) {
+  numLegs = numLegs || parseInt(document.getElementById('autoLegs')?.value || '3');
+  selectedLegs = [];
+  const eventos = eventosActivos();
+  if (eventos.length === 0) { showError('No hay eventos en esta liga.'); return; }
+
+  // 1) Para cada evento, el mejor pick (max probReal con EV >= -0.15)
+  const mejoresPorEvento = eventos.map(ev => {
+    const cands = [];
+    ev.markets.forEach(market => {
+      market.selections.forEach(sel => {
+        const p = realProb(sel.decimalOdds, market);     // %
+        const pImp = impliedProb(sel.decimalOdds);       // % (ya incluye *100)
+        const ev1 = (p / 100) * sel.decimalOdds - 1;
+        cands.push({
+          event: ev.event, date: ev.date, league: ev.league,
+          market: market.name, marketRef: market,
+          selection: sel.name, decimalOdds: sel.decimalOdds,
+          probReal: p, probImplied: pImp, ev: ev1,
+          valueEdge: p - pImp
+        });
+      });
+    });
+    // Mejor del evento: max probReal con EV no catastrófico
+    const ok = cands.filter(c => c.ev >= -0.15);
+    const pool = ok.length > 0 ? ok : cands;
+    return pool.slice().sort((a, b) => b.probReal - a.probReal)[0];
+  });
+
+  // 2) Ordenar todos por probReal desc
+  mejoresPorEvento.sort((a, b) => b.probReal - a.probReal);
+
+  // 3) Tomar top M candidatos (M = max(numLegs, 5)) y evaluar combinaciones
+  const M = Math.min(Math.max(numLegs + 2, 5), mejoresPorEvento.length);
+  const top = mejoresPorEvento.slice(0, M);
+
+  // 4) Probar todas las combinaciones de tamaño numLegs y elegir la de mejor EV
+  let mejorComb = null;
+  function combinar(arr, k, start, cur) {
+    if (cur.length === k) {
+      const ev = evaluarCombinacion(cur.slice());
+      if (!mejorComb || ev.evCombinado > mejorComb.evCombinado) mejorComb = ev;
+      return;
+    }
+    for (let i = start; i < arr.length; i++) {
+      cur.push(arr[i]);
+      combinar(arr, k, i + 1, cur);
+      cur.pop();
+    }
+  }
+  if (top.length < numLegs) numLegs = top.length;
+  combinar(top, numLegs, 0, []);
+
+  if (!mejorComb || mejorComb.picks.length < 2) {
+    showError('No se pudo generar un parley con al menos 2 legs.');
+    return;
+  }
+
+  // 5) Cargar el parley en selectedLegs y mostrar análisis
+  selectedLegs = mejorComb.picks;
+  renderLegs();
+  calculateParlay();
+  renderFeed();
+  mostrarAnalisis(mejorComb);
+}
+
+// Panel de análisis detallado del parley generado
+function mostrarAnalisis(comb) {
+  let panel = document.getElementById('autoAnalisisPanel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'autoAnalisisPanel';
+    panel.className = 'auto-result';
+    document.querySelector('#feedGrid').closest('.card').after(panel);
+  }
+  const p = comb.picks;
+  const pAcierto = comb.probAjustada * 100;
+  const pIndep = comb.probIndependiente * 100;
+  const evPct = comb.evCombinado * 100;
+  const vEdgeMedioPct = comb.valueEdgeMedio;
+  // Clasificación de confianza
+  let confianza, confColor;
+  if (pAcierto >= 30) { confianza = 'ALTA'; confColor = 'var(--accent-2)'; }
+  else if (pAcierto >= 15) { confianza = 'MEDIA'; confColor = 'var(--accent-3)'; }
+  else { confianza = 'BAJA (especulativo)'; confColor = 'var(--danger)'; }
+  // Stake sugerido (¼ Kelly sobre 100 u hipotético)
+  const stakeHipotetico = 100;
+  const stakeSug = comb.kellyFracc * stakeHipotetico;
+  const pago = stakeSug * comb.cuotaCombinada;
+  const gan = pago - stakeSug;
+  const roi = stakeSug > 0 ? (gan / stakeSug) * 100 : 0;
+
+  const evSign = evPct >= 0 ? '+' : '';
+  const vSign = vEdgeMedioPct >= 0 ? '+' : '';
+  const evClass = evPct >= 0 ? 'green' : (evPct >= -5 ? 'amber' : 'red');
+
+  let html = `<h4>🎯 Parley generado · ${p.length} legs · Confianza: <span style="color:${confColor}">${confianza}</span></h4>`;
+  html += `<div style="font-size:.8rem;color:var(--muted);margin-bottom:.8rem;">Algoritmo: para cada evento, selección de mayor probabilidad real (sin vig); combinación óptima de ${p.length} legs por EV ajustado por correlación ρ=${RHO_PARLAY}.</div>`;
+
+  // Métricas combinadas
+  html += `<div class="summary-grid" style="margin-bottom:1rem;">`;
+  html += `<div class="metric"><div class="label">P(acierto parley)</div><div class="value blue">${pAcierto.toFixed(2)}%</div><div class="hint">Ajustada ρ=${RHO_PARLAY} · sin vig</div></div>`;
+  html += `<div class="metric"><div class="label">Cuota combinada</div><div class="value blue">${comb.cuotaCombinada.toFixed(2)} <span style="font-size:.85rem;color:var(--muted)">(${decimalToAmerican(comb.cuotaCombinada)})</span></div><div class="hint">Producto de cuotas</div></div>`;
+  html += `<div class="metric"><div class="label">EV combinado</div><div class="value ${evClass}">${evSign}${evPct.toFixed(2)}%</div><div class="hint">p_adj × cuota − 1</div></div>`;
+  html += `<div class="metric"><div class="label">Value edge medio</div><div class="value ${vEdgeMedioPct>=0?'green':'amber'}">${vSign}${vEdgeMedioPct.toFixed(2)}%</div><div class="hint">probReal − probImplícita</div></div>`;
+  html += `<div class="metric"><div class="label">Stake Kelly (¼)</div><div class="value green">${stakeSug.toFixed(2)} u</div><div class="hint">${(comb.kellyFracc*100).toFixed(2)}% de 100u</div></div>`;
+  html += `<div class="metric"><div class="label">Pago potencial</div><div class="value green">${pago.toFixed(2)} u</div><div class="hint">Stake × cuota</div></div>`;
+  html += `<div class="metric"><div class="label">Ganancia neta</div><div class="value green">${gan>=0?'+':''}${gan.toFixed(2)} u</div><div class="hint">Pago − stake</div></div>`;
+  html += `<div class="metric"><div class="label">ROI</div><div class="value ${roi>=0?'green':'amber'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div><div class="hint">Ganancia / stake</div></div>`;
+  html += `</div>`;
+
+  // Detalle por pick con justificación
+  html += `<div style="margin-top:1rem;"><strong style="color:var(--accent);font-size:.9rem;">📋 Justificación por pick</strong>`;
+  p.forEach((pk, i) => {
+    const probPct = pk.probReal;
+    const evPick = pk.ev * 100;
+    const vEdgePct = pk.valueEdge;
+    let tag = '';
+    if (probPct >= 60) tag = '<span style="color:var(--accent-2);font-size:.72rem;">● favorito claro</span>';
+    else if (probPct >= 45) tag = '<span style="color:var(--accent-3);font-size:.72rem;">● favorito moderado</span>';
+    else tag = '<span style="color:var(--muted);font-size:.72rem;">● partido equilibrado</span>';
+    html += `
+      <div style="background:var(--input-bg);border-left:3px solid var(--accent-2);border-radius:0 6px 6px 0;padding:.6rem .8rem;margin-top:.5rem;font-size:.82rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.3rem;">
+          <span><b>PICK ${i+1}:</b> ${pk.selection} <span style="color:var(--muted);">(${pk.market})</span> ${tag}</span>
+          <span style="color:var(--accent-2);font-weight:700;">${decimalToAmerican(pk.decimalOdds)}</span>
+        </div>
+        <div style="color:var(--muted);font-size:.75rem;margin-top:.2rem;">${pk.event} · 📅 ${pk.date} · ${pk.league}</div>
+        <div style="display:flex;gap:1rem;margin-top:.3rem;flex-wrap:wrap;font-size:.72rem;">
+          <span>Prob. real: <b style="color:var(--accent);">${probPct.toFixed(1)}%</b></span>
+          <span>Implícita: ${(pk.probImplied).toFixed(1)}%</span>
+          <span>EV: <b style="color:${evPick>=0?'var(--accent-2)':'var(--danger)'}">${evPick>=0?'+':''}${evPick.toFixed(1)}%</b></span>
+          <span>Value edge: <b style="color:${vEdgePct>=0?'var(--accent-2)':'var(--accent-3)'}">${vEdgePct>=0?'+':''}${vEdgePct.toFixed(2)}%</b></span>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+
+  // Nota sobre la correlación y el EV
+  if (evPct < 0) {
+    html += `<div class="note" style="margin-top:1rem;">⚠️ <strong>EV negativo:</strong> con cuotas de bookie (que incluyen margen), el EV del parley tiende a ser negativo. Esto es esperado: el bookie cobra ~5-6% por leg, y se compone en parley. El algoritmo elige la combinación que <em>minimiza</em> ese EV negativo (es decir, la de mayor valor relativo). Para EV+, se necesitaría un modelo propio que identifique value bets reales (ver sistema Tata Iraka).</div>`;
+  }
+
+  panel.innerHTML = html;
+}
+
+// ============================================================
+// 9b) RESULTADOS DE PARTIDOS (marcar ganador / simular / verificar)
+// ============================================================
+
+// Busca el resultado real de un partido por nombre de equipos (flexible)
+function buscarResultadoReal(league, home, away) {
+  const lista = RESULTADOS_REALES_LM[league] || [];
+  function match(s, r) {
+    s = s.toLowerCase().replace(/[.\-]/g, '');
+    r = r.toLowerCase().replace(/[.\-]/g, '');
+    if (s === r) return true;
+    if (s.split(' ').pop() === r.split(' ').pop()) return true;
+    if (s.includes(r) || r.includes(s)) return true;
+    return false;
+  }
+  for (const r of lista) {
+    const [rh, rhs, ra, ras, status, date] = r;
+    if ((match(home, rh) && match(away, ra)) || (match(home, ra) && match(away, rh))) {
+      // Determinar cuál es local en el resultado real
+      const homeIsHomeReal = match(home, rh);
+      return {
+        homeReal: rh, awayReal: ra,
+        hs: rhs, as: ras,
+        homeScore: homeIsHomeReal ? rhs : ras,
+        awayScore: homeIsHomeReal ? ras : rhs,
+        status: status, date: date,
+      };
+    }
+  }
+  return null;
+}
+
+// Estado: resultados[eventIdx] = '1' | '2' | 'X' (o para MLB solo 1/2)
+let resultados = {}; // key: eventIdx -> resultado marcado
+
+// Muestrea Poisson (Knuth)
+function samplePoissonLM(lambda) {
+  const L = Math.exp(-lambda);
+  let k = 0, p = 1;
+  do { k++; p *= Math.random(); } while (p > L);
+  return k - 1;
+}
+
+// Simula resultados para todos los eventos visibles de la liga activa
+function simularResultados() {
+  // Carga resultados REALES (no simula) desde RESULTADOS_REALES_LM (embebido).
+  // Para cada evento del feed, busca su marcador real por par de equipos.
+  const eventos = eventosActivos();
+  resultados = {};
+  let encontrados = 0, pendientes = 0, noEncontrados = 0;
+  eventos.forEach(ev => {
+    const realIdx = FEED_DATA.indexOf(ev);
+    // Parsear "Local vs Visitante"
+    const parts = ev.event.split(' vs ');
+    if (parts.length !== 2) return;
+    const home = parts[0].trim(), away = parts[1].trim();
+    const r = buscarResultadoReal(ev.league, home, away);
+    if (!r) {
+      resultados[realIdx] = { ganador: null, homeScore: null, awayScore: null, status: 'no_encontrado', date: ev.date };
+      noEncontrados++;
+      return;
+    }
+    if (r.status === 'Final' && r.homeScore !== null && r.awayScore !== null) {
+      const ganador = r.homeScore > r.awayScore ? '1' : (r.homeScore < r.awayScore ? '2' : 'X');
+      resultados[realIdx] = { ganador, homeScore: r.homeScore, awayScore: r.awayScore, status: 'Final', date: r.date };
+      encontrados++;
+    } else if (r.status === 'Live') {
+      const ganador = r.homeScore > r.awayScore ? '1' : (r.homeScore < r.awayScore ? '2' : 'X');
+      resultados[realIdx] = { ganador, homeScore: r.homeScore, awayScore: r.awayScore, status: 'Live', date: r.date };
+      encontrados++;
+    } else {
+      resultados[realIdx] = { ganador: null, homeScore: null, awayScore: null, status: 'Scheduled', date: r.date };
+      pendientes++;
+    }
+  });
+  renderResults();
+  verificarParley();
+}
+
+// Limpia resultados
+function limpiarResultados() {
+  resultados = {};
+  renderResults();
+  document.getElementById('parleyVerdictPanel').innerHTML = '';
+}
+
+// Renderiza el panel de resultados (con marcadores reales + override manual)
+function renderResults() {
+  const grid = $('resultsGrid');
+  const eventos = eventosActivos();
+  grid.innerHTML = '';
+  if (eventos.length === 0) {
+    grid.innerHTML = '<p style="color:var(--muted);">No hay eventos para esta liga.</p>';
+    return;
+  }
+  eventos.forEach(ev => {
+    const realIdx = FEED_DATA.indexOf(ev);
+    const ml = ev.markets.find(m => /moneyline|ML/i.test(m.name)) || ev.markets[0];
+    const es3way = ml && ml.selections.length === 3;
+    const sel = resultados[realIdx];
+    const card = document.createElement('div');
+    card.className = 'feed-item';
+    // Estado real
+    const status = sel?.status || 'pendiente';
+    const ganador = sel?.ganador;
+    const hs = sel?.homeScore;
+    const as_ = sel?.awayScore;
+    let statusLabel, statusColor, marcadorLabel;
+    if (status === 'Final' && ganador) {
+      statusLabel = '✓ Final'; statusColor = 'var(--accent-2)';
+      marcadorLabel = `<b style="color:var(--accent);font-size:1.1em;">${hs} - ${as_}</b> · ${ganador==='1'?'Local':(ganador==='X'?'Empate':'Visitante')}`;
+    } else if (status === 'Live') {
+      statusLabel = '🔴 En vivo'; statusColor = 'var(--accent-3)';
+      marcadorLabel = `<b style="color:var(--accent-3);font-size:1.1em;">${hs} - ${as_}</b> (en curso)`;
+    } else if (status === 'Scheduled') {
+      statusLabel = '⌛ Programado'; statusColor = 'var(--muted)';
+      marcadorLabel = '<span style="color:var(--muted);font-style:italic;">por jugar</span>';
+    } else if (status === 'no_encontrado') {
+      statusLabel = '✗ Sin datos'; statusColor = 'var(--danger)';
+      marcadorLabel = '<span style="color:var(--muted);font-style:italic;">no encontrado en fuente</span>';
+    } else {
+      statusLabel = '⌛ Pendiente'; statusColor = 'var(--muted)';
+      marcadorLabel = '— pendiente —';
+    }
+    // Botones de marcaje manual (override del real si el usuario quiere)
+    let opciones = '';
+    if (ml) {
+      const sels = ml.selections;
+      opciones = sels.map((s, i) => {
+        const val = es3way ? (i === 0 ? '1' : (i === 1 ? 'X' : '2')) : (i === 0 ? '1' : '2');
+        const active = ganador === val ? 'background:var(--accent);color:#0f172a;border-color:var(--accent);' : '';
+        return `<button class="btn btn-sm btn-outline" style="margin-right:.3rem;${active}" data-res="${val}">${s.name}</button>`;
+      }).join('');
+    }
+    card.innerHTML = `
+      <h4>${ev.event}</h4>
+      <div class="meta">${LEAGUES_INFO[ev.league]?.label || ev.league} · <span class="date">📅 ${ev.date}</span> · <span style="color:${statusColor};font-weight:700;">${statusLabel}</span></div>
+      <div style="margin-top:.5rem;">${opciones}</div>
+      <div style="margin-top:.4rem;font-size:.82rem;">Resultado: ${marcadorLabel}</div>
+    `;
+    card.querySelectorAll('button[data-res]').forEach(b => {
+      b.addEventListener('click', () => {
+        // Override manual: el usuario marca el resultado
+        resultados[realIdx] = { ganador: b.dataset.res, homeScore: sel?.homeScore, awayScore: sel?.awayScore, status: sel?.status || 'manual', date: sel?.date };
+        renderResults();
+        verificarParley();
+      });
+    });
+    grid.appendChild(card);
+  });
+}
+
+// Verifica el parley actual contra los resultados reales
+function verificarParley() {
+  const panel = $('parleyVerdictPanel');
+  if (selectedLegs.length < 2) {
+    panel.innerHTML = '<div class="note">ℹ️ Genera un parley primero (botón ⚙️) para verificarlo contra los resultados reales.</div>';
+    return;
+  }
+  // Verificar que cada leg tenga resultado cargado
+  const sinResultado = selectedLegs.filter(leg => {
+    const idx = FEED_DATA.findIndex(e => e.event === leg.event);
+    return idx < 0 || !resultados[idx];
+  });
+  if (sinResultado.length > 0) {
+    panel.innerHTML = `<div class="note">⚠️ Faltan cargar ${sinResultado.length} resultado(s). Pulsa "🎲 Simular todos los resultados" para cargar los reales, o marca manualmente.</div>`;
+    return;
+  }
+  let aciertos = 0, fallidos = 0, porJugar = 0;
+  const veredictos = selectedLegs.map((leg, i) => {
+    const idx = FEED_DATA.findIndex(e => e.event === leg.event);
+    const res = resultados[idx];
+    const evento = FEED_DATA[idx];
+    const ml = evento.markets.find(m => /moneyline|ML/i.test(m.name)) || evento.markets[0];
+    const selLocal = ml && ml.selections[0]?.name;
+    const selVisit = ml && (ml.selections.length === 3 ? ml.selections[2].name : ml.selections[1].name);
+    // Determinar predicho (1/X/2)
+    let predicho = null;
+    if (leg.selection.includes(selLocal)) predicho = '1';
+    else if (leg.selection.includes(selVisit)) predicho = '2';
+    else if (leg.selection.toLowerCase().includes('draw') || leg.selection.toLowerCase().includes('empate')) predicho = 'X';
+    else predicho = leg.selection.includes(selLocal) ? '1' : '2';
+    // Estado del resultado
+    const status = res?.status || 'pendiente';
+    let acierto = false, jugado = false;
+    if (status === 'Final' || status === 'Live' || status === 'manual') {
+      jugado = res.ganador !== null && res.ganador !== undefined;
+      acierto = jugado && predicho === res.ganador;
+      if (jugado) { if (acierto) aciertos++; else fallidos++; }
+      else porJugar++;
+    } else {
+      porJugar++;
+    }
+    return { leg, res, predicho, acierto, jugado, status, evento };
+  });
+  const cuota = selectedLegs.reduce((c, l) => c * l.decimalOdds, 1);
+  const todosJugados = porJugar === 0;
+  const parleyGanado = todosJugados && aciertos === selectedLegs.length;
+  const parleyFallado = todosJugados && fallidos > 0;
+  const veredictoTxt = !todosJugados ? '⌛ POR JUGAR' : (parleyGanado ? '🎉 PARLEY GANADO' : '❌ PARLEY FALLADO');
+  const veredictoColor = !todosJugados ? 'var(--accent-3)' : (parleyGanado ? 'var(--accent-2)' : 'var(--danger)');
+  const pnl = !todosJugados ? 0 : (parleyGanado ? (cuota - 1) : -1);
+  const pnlTxt = !todosJugados ? '—' : (pnl >= 0 ? '+' + pnl.toFixed(2) : pnl.toFixed(2)) + 'u';
+  let html = `
+    <div class="auto-result" style="border-left-color:${veredictoColor};">
+      <h4 style="color:${veredictoColor};">
+        ${veredictoTxt} · ${aciertos}/${selectedLegs.length} aciertos${porJugar>0?` · ${porJugar} por jugar`:''}
+      </h4>
+      <div class="summary-grid" style="margin-top:.8rem;">
+        <div class="metric"><div class="label">Cuota combinada</div><div class="value blue">${cuota.toFixed(2)}</div><div class="hint">(${decimalToAmerican(cuota)})</div></div>
+        <div class="metric"><div class="label">Veredicto</div><div class="value" style="color:${veredictoColor};">${!todosJugados?'⌛':(parleyGanado?'✓ GANADO':'✗ FALLADO')}</div><div class="hint">${aciertos}/${selectedLegs.length} legs · ${fallidos} fallados</div></div>
+        <div class="metric"><div class="label">P&L (1u)</div><div class="value" style="color:${!todosJugados?'var(--muted)':(pnl>=0?'var(--accent-2)':'var(--danger)')};">${pnlTxt}</div><div class="hint">Por unidad apostada</div></div>
+        <div class="metric"><div class="label">Hit rate</div><div class="value blue">${(aciertos/selectedLegs.length*100).toFixed(0)}%</div><div class="hint">Picks acertados</div></div>
+      </div>
+      <div style="margin-top:1rem;"><strong style="color:var(--accent);font-size:.9rem;">📋 Detalle por pick</strong>`;
+  veredictos.forEach((v, i) => {
+    const jugado = v.jugado;
+    const icono = !jugado ? '⌛' : (v.acierto ? '✓' : '✗');
+    const color = !jugado ? 'var(--accent-3)' : (v.acierto ? 'var(--accent-2)' : 'var(--danger)');
+    const resLabel = !jugado ? 'por jugar' :
+      (v.res.ganador === '1' ? `Local (${v.res.homeScore}-${v.res.awayScore})` :
+       v.res.ganador === 'X' ? `Empate (${v.res.homeScore}-${v.res.awayScore})` :
+       `Visitante (${v.res.homeScore}-${v.res.awayScore})`);
+    const estadoTxt = !jugado ? (v.status === 'Live' ? '🔴 EN VIVO' : '⌛ POR JUGAR') : (v.acierto ? 'ACIERTO' : 'FALLO');
+    html += `
+      <div style="background:var(--input-bg);border-left:3px solid ${color};border-radius:0 6px 6px 0;padding:.6rem .8rem;margin-top:.5rem;font-size:.82rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.3rem;">
+          <span><b>${icono} PICK ${i+1}:</b> ${v.leg.selection}</span>
+          <span style="color:${color};font-weight:700;">${estadoTxt}</span>
+        </div>
+        <div style="color:var(--muted);font-size:.75rem;margin-top:.2rem;">${v.evento.event} · 📅 ${v.evento.date}</div>
+        <div style="font-size:.72rem;margin-top:.2rem;">Predicho: <b>${v.predicho==='1'?'Local':v.predicho==='X'?'Empate':'Visitante'}</b> · Resultado real: <b style="color:${color};">${resLabel}</b></div>
+      </div>`;
+  });
+  html += `</div></div>`;
+  panel.innerHTML = html;
+}
+
+// ============================================================
+// 10) LISTENERS + INIT
+// ============================================================
+clearLegsBtn.addEventListener('click', () => { selectedLegs = []; renderLegs(); renderFeed(); });
+calcBtn.addEventListener('click', calculateParlay);
+autoParlayBtn.addEventListener('click', () => { autoParlay(); /* re-verificar si hay resultados */ if (Object.keys(resultados).length > 0) setTimeout(verificarParley, 100); });
+stakeInput.addEventListener('input', () => { if (selectedLegs.length >= 2) calculateParlay(); });
+marketFilter.addEventListener('change', renderFeed);
+$('simResultsBtn').addEventListener('click', simularResultados);
+$('clearResultsBtn').addEventListener('click', limpiarResultados);
+$('checkParlayBtn').addEventListener('click', verificarParley);
+
+// ============================================================
+// 10) TOGGLE TEMA OSCURO/CLARO
+// ============================================================
+const themeToggle = $('themeToggle');
+function aplicarTema(claro) {
+  if (claro) {
+    document.body.classList.add('light');
+    themeToggle.textContent = '☀️ Claro';
+  } else {
+    document.body.classList.remove('light');
+    themeToggle.textContent = '🌙 Oscuro';
+  }
+}
+// Cargar preferencia guardada (por defecto oscuro)
+const temaGuardado = localStorage.getItem('linemate-theme');
+aplicarTema(temaGuardado === 'light');
+themeToggle.addEventListener('click', () => {
+  const claro = !document.body.classList.contains('light');
+  aplicarTema(claro);
+  localStorage.setItem('linemate-theme', claro ? 'light' : 'dark');
+});
+
+renderTabs();
+updateDayFilter();
+updateMarketFilter();
+
+// ============================================================
+// SMART MONEY TRACKER — render
+// ============================================================
+function smProbModel(decimalOdds, mercado, selName) {
+  // Probabilidad real (sin vig) de la selección dentro de su mercado.
+  if (!mercado || decimalOdds <= 1) return decimalOdds > 1 ? 1/decimalOdds : 0.5;
+  var suma = mercado.selections.reduce(function(s,x){ return s + (x.decimalOdds>1 ? 1/x.decimalOdds : 0); }, 0);
+  if (suma <= 0) return decimalOdds > 1 ? 1/decimalOdds : 0.5;
+  return (1/decimalOdds) / suma;
+}
+
+function smAnalizeAll() {
+  var rows = [];
+  FEED_DATA.forEach(function(ev) {
+    ev.markets.forEach(function(mkt) {
+      mkt.selections.forEach(function(sel) {
+        var dec = sel.decimalOdds;
+        var pModel = smProbModel(dec, mkt, sel.name);
+        var sm = SmartMoney.analyze({
+          league: ev.league, event: ev.event, market: mkt.name,
+          selection: sel.name, date: ev.date, decimalOdds: dec, probModel: pModel
+        });
+        rows.push({
+          event: ev.event, league: ev.league, date: ev.date,
+          market: mkt.name, selection: sel.name, decimalOdds: dec,
+          amer: decimalToAmerican(dec), pModel: pModel, sm: sm
+        });
+      });
+    });
+  });
+  return rows;
+}
+
+function smRender() {
+  var all = smAnalizeAll();
+  var leagueSel = document.getElementById('smLeagueFilter');
+  var verdictSel = document.getElementById('smVerdictFilter');
+  var league = leagueSel ? leagueSel.value : 'all';
+  var verdict = verdictSel ? verdictSel.value : 'all';
+  var rows = all.filter(function(r){
+    return (league==='all' || r.league===league) &&
+           (verdict==='all' || r.sm.verdict===verdict);
+  });
+  // Ordenar por edge descendente (mejor valor primero)
+  rows.sort(function(a,b){ return b.sm.edgePct - a.sm.edgePct; });
+
+  // Summary
+  var n = rows.length;
+  var buys = rows.filter(function(r){ return r.sm.verdict==='BUY'; }).length;
+  var watches = rows.filter(function(r){ return r.sm.verdict==='WATCH'; }).length;
+  var avoids = rows.filter(function(r){ return r.sm.verdict==='AVOID'; }).length;
+  var avgSharp = n? Math.round(rows.reduce(function(s,r){return s+r.sm.sharpPct;},0)/n) : 0;
+  var avgEdge = n? (rows.reduce(function(s,r){return s+r.sm.edgePct;},0)/n).toFixed(1) : '0.0';
+  var rlmCount = rows.filter(function(r){ return r.sm.rlm; }).length;
+  var steamCount = rows.filter(function(r){ return r.sm.steam; }).length;
+
+  var summary = document.getElementById('smSummary');
+  summary.innerHTML =
+    '<div class="metric"><div class="label">Selecciones</div><div class="value blue">'+n+'</div></div>' +
+    '<div class="metric"><div class="label">🟢 BUY</div><div class="value green">'+buys+'</div></div>' +
+    '<div class="metric"><div class="label">🟡 WATCH</div><div class="value amber">'+watches+'</div></div>' +
+    '<div class="metric"><div class="label">🔴 AVOID</div><div class="value red">'+avoids+'</div></div>' +
+    '<div class="metric"><div class="label">Sharp medio</div><div class="value blue">'+avgSharp+'%</div></div>' +
+    '<div class="metric"><div class="label">Edge medio</div><div class="value '+(parseFloat(avgEdge)>=0?'green':'red')+'">'+(parseFloat(avgEdge)>=0?'+':'')+avgEdge+'%</div></div>' +
+    '<div class="metric"><div class="label">🔄 RLM</div><div class="value amber">'+rlmCount+'</div></div>' +
+    '<div class="metric"><div class="label">🔥 STEAM</div><div class="value amber">'+steamCount+'</div></div>';
+
+  // Tabla (limitar a las 200 mejores por edge para mantener la tabla navegable)
+  var body = document.getElementById('smTableBody');
+  var fmtDate = function(d){ if(!d) return '—'; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; };
+  var TOP_N = 200;
+  var shown = rows.slice(0, TOP_N);
+  var notice = rows.length > TOP_N
+    ? '<div class="sm-note" style="margin-top:.4rem;">Mostrando las <b>'+TOP_N+'</b> mejores selecciones por Edge de <b>'+rows.length+'</b> totales. Usa el filtro de liga/veredicto para acotar.</div>'
+    : '';
+  body.innerHTML = shown.map(function(r){
+    var flags = [];
+    if (r.sm.rlm) flags.push('<span class="sm-badge sm-rlm">🔄 RLM</span>');
+    if (r.sm.steam) flags.push('<span class="sm-badge sm-steam">🔥 STEAM</span>');
+    if (!flags.length) flags.push('<span style="color:var(--muted);font-size:.75rem;">—</span>');
+    return '<tr>' +
+      '<td style="font-weight:600;">'+r.event+'</td>' +
+      '<td><span class="tab" style="display:inline-block;pointer-events:none;">'+r.league+'</span></td>' +
+      '<td style="color:var(--accent-3);font-size:.78rem;">'+fmtDate(r.date)+'</td>' +
+      '<td style="font-size:.78rem;color:var(--muted);">'+r.market+'</td>' +
+      '<td style="font-size:.82rem;">'+r.selection+'</td>' +
+      '<td style="font-variant-numeric:tabular-nums;"><b>'+r.decimalOdds.toFixed(2)+'</b> <span style="color:var(--muted);font-size:.7rem;">'+r.amer+'</span></td>' +
+      '<td style="font-variant-numeric:tabular-nums;color:var(--accent);">'+r.sm.sharpPct+'%</td>' +
+      '<td style="font-variant-numeric:tabular-nums;color:var(--accent-3);">'+r.sm.ticketPct+'%</td>' +
+      '<td style="font-variant-numeric:tabular-nums;color:'+(r.sm.edgePct>=0?'var(--accent-2)':'var(--danger)')+';">'+(r.sm.edgePct>=0?'+':'')+r.sm.edgePct+'%</td>' +
+      '<td>'+flags.join(' ')+'</td>' +
+      '<td><span class="sm-badge sm-verdict sm-'+r.sm.verdictClass+'">'+r.sm.verdict+'</span></td>' +
+      '</tr>';
+  }).join('') + notice;
+}
+
+function smInitFilters() {
+  var leagueSel = document.getElementById('smLeagueFilter');
+  var leagues = Object.keys(LEAGUES_INFO);
+  leagueSel.innerHTML = '<option value="all">Todas las ligas</option>' +
+    leagues.map(function(l){ return '<option value="'+l+'">'+l+'</option>'; }).join('');
+  leagueSel.addEventListener('change', window.smRender);
+  document.getElementById('smVerdictFilter').addEventListener('change', window.smRender);
+  document.getElementById('smRefreshBtn').addEventListener('click', window.smRender);
+  // Listeners para el toggle Live/Model
+  document.querySelectorAll('input[name=smMode]').forEach(function(radio){
+    radio.addEventListener('change', window.smRender);
+  });
+}
+
+
+// ============================================================
+// SMART MONEY — MODO LIVE / MODEL
+// ============================================================
+var SM_MODE = 'model'; // 'model' | 'live'
+
+function smGetMode() {
+  var checked = document.querySelector('input[name=smMode]:checked');
+  return checked ? checked.value : 'model';
+}
+
+async function smCheckBackend() {
+  var statusEl = document.getElementById('smModeStatus');
+  var banner = document.getElementById('smLiveBanner');
+  var errEl = document.getElementById('smLiveError');
+  var errMsg = document.getElementById('smLiveErrorMsg');
+  var urlEl = document.getElementById('smBackendUrl');
+  var quotaEl = document.getElementById('smLiveQuota');
+  if (urlEl) urlEl.textContent = SM_LIVE.baseUrl();
+  if (smGetMode() !== 'live') {
+    if (statusEl) statusEl.textContent = '';
+    if (banner) banner.style.display = 'none';
+    if (errEl) errEl.style.display = 'none';
+    return false;
+  }
+  if (statusEl) statusEl.textContent = '⏳ comprobando…';
+  var ok = await SM_LIVE.isAvailable();
+  if (ok) {
+    if (statusEl) statusEl.textContent = '✅ conectado';
+    if (banner) banner.style.display = 'block';
+    if (errEl) errEl.style.display = 'none';
+    // Mostrar info de cuota
+    try {
+      var h = await SM_LIVE.health();
+      if (quotaEl) {
+        var q = h.quota || {};
+        quotaEl.textContent = ' · Cuota The Odds API: ' + (q.remaining != null ? q.remaining + ' restantes' : '—') + (h.demoMode ? ' · DEMO_MODE' : ' · LIVE');
+      }
+    } catch(_e) {}
+  } else {
+    if (statusEl) statusEl.textContent = '❌ no disponible';
+    if (banner) banner.style.display = 'none';
+    if (errEl) errEl.style.display = 'block';
+    if (errMsg) errMsg.textContent = 'No se pudo conectar con ' + SM_LIVE.baseUrl();
+  }
+  return ok;
+}
+
+async function smAnalizeAllLive() {
+  // En modo live, consulta el backend. La liga del filtro actualiza el endpoint.
+  var leagueSel = document.getElementById('smLeagueFilter');
+  var league = leagueSel ? leagueSel.value : 'all';
+  var rows;
+  try {
+    if (league === 'all') {
+      rows = await SM_LIVE.fetchAll();
+    } else {
+      rows = await SM_LIVE.fetchLeague(league);
+    }
+  } catch (err) {
+    console.warn('SM_LIVE error:', err);
+    rows = [];
+  }
+  // Convertir al formato unificado del frontend
+  return rows.map(SM_LIVE.toFrontendRow);
+}
+
+// Sobrescribe smRender para que sea async y soporte ambos modos
+var _smRenderOriginal = smRender;
+async function smRenderAsync() {
+  SM_MODE = smGetMode();
+  var all;
+  if (SM_MODE === 'live') {
+    var ok = await smCheckBackend();
+    if (!ok) {
+      // Mostrar tabla vacía con aviso (el banner ya está visible)
+      all = [];
+    } else {
+      all = await smAnalizeAllLive();
+    }
+  } else {
+    // Modo modelo (determinista local)
+    document.getElementById('smLiveBanner').style.display = 'none';
+    document.getElementById('smLiveError').style.display = 'none';
+    document.getElementById('smModeStatus').textContent = '';
+    all = smAnalizeAll();
+  }
+  // Reutiliza la lógica de filtrado/summary/tabla del _smRenderOriginal,
+  // pero inyectando `all` ya calculado.
+  smRenderFromRows(all);
+}
+
+// Función unificada que dibuja la tabla a partir de un array de filas
+function smRenderFromRows(allRows) {
+  var leagueSel = document.getElementById('smLeagueFilter');
+  var verdictSel = document.getElementById('smVerdictFilter');
+  var league = leagueSel ? leagueSel.value : 'all';
+  var verdict = verdictSel ? verdictSel.value : 'all';
+  var rows = allRows.filter(function(r){
+    return (league==='all' || r.league===league || r.sm.league===league) &&
+           (verdict==='all' || r.sm.verdict===verdict);
+  });
+  rows.sort(function(a,b){ return b.sm.edgePct - a.sm.edgePct; });
+
+  var n = rows.length;
+  var buys = rows.filter(function(r){ return r.sm.verdict==='BUY'; }).length;
+  var watches = rows.filter(function(r){ return r.sm.verdict==='WATCH'; }).length;
+  var avoids = rows.filter(function(r){ return r.sm.verdict==='AVOID'; }).length;
+  var avgSharp = n? Math.round(rows.reduce(function(s,r){return s+r.sm.sharpPct;},0)/n) : 0;
+  var avgEdge = n? (rows.reduce(function(s,r){return s+r.sm.edgePct;},0)/n).toFixed(1) : '0.0';
+  var rlmCount = rows.filter(function(r){ return r.sm.rlm; }).length;
+  var steamCount = rows.filter(function(r){ return r.sm.steam; }).length;
+
+  var summary = document.getElementById('smSummary');
+  summary.innerHTML =
+    '<div class="metric"><div class="label">Selecciones</div><div class="value blue">'+n+'</div></div>' +
+    '<div class="metric"><div class="label">🟢 BUY</div><div class="value green">'+buys+'</div></div>' +
+    '<div class="metric"><div class="label">🟡 WATCH</div><div class="value amber">'+watches+'</div></div>' +
+    '<div class="metric"><div class="label">🔴 AVOID</div><div class="value red">'+avoids+'</div></div>' +
+    '<div class="metric"><div class="label">Sharp medio</div><div class="value blue">'+avgSharp+'%</div></div>' +
+    '<div class="metric"><div class="label">Edge medio</div><div class="value '+(parseFloat(avgEdge)>=0?'green':'red')+'">'+(parseFloat(avgEdge)>=0?'+':'')+avgEdge+'%</div></div>' +
+    '<div class="metric"><div class="label">🔄 RLM</div><div class="value amber">'+rlmCount+'</div></div>' +
+    '<div class="metric"><div class="label">🔥 STEAM</div><div class="value amber">'+steamCount+'</div></div>';
+
+  var body = document.getElementById('smTableBody');
+  var fmtDate = function(d){ if(!d) return '—'; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; };
+  var TOP_N = 200;
+  var shown = rows.slice(0, TOP_N);
+  var notice = rows.length > TOP_N
+    ? '<div class="sm-note" style="margin-top:.4rem;">Mostrando las <b>'+TOP_N+'</b> mejores selecciones por Edge de <b>'+rows.length+'</b> totales. Usa el filtro de liga/veredicto para acotar.</div>'
+    : '';
+  body.innerHTML = shown.map(function(r){
+    var flags = [];
+    if (r.sm.rlm) flags.push('<span class="sm-badge sm-rlm">🔄 RLM</span>');
+    if (r.sm.steam) flags.push('<span class="sm-badge sm-steam">🔥 STEAM</span>');
+    if (r.extra && r.extra.lineMovement) flags.push('<span class="sm-badge sm-steam" title="Movimiento de línea detectado vs snapshot anterior">📉 MOVE</span>');
+    if (!flags.length) flags.push('<span style="color:var(--muted);font-size:.75rem;">—</span>');
+    var amerText = r.amer || (r.decimalOdds>1 ? (function(){var d=r.decimalOdds; return d>2 ? '+'+Math.round((d-1)*100) : '-'+Math.round(100/(d-1));})() : '');
+    var extraCol = r.source === 'live'
+      ? '<td style="font-size:.7rem;color:var(--muted);">'+(r.extra && r.extra.sharpOdds ? r.extra.sharpOdds.toFixed(2)+' / '+(r.extra.publicOdds||0).toFixed(2) : '—')+'</td>'
+      : '<td style="font-size:.7rem;color:var(--muted);">—</td>';
+    return '<tr>' +
+      '<td style="font-weight:600;">'+r.event+'</td>' +
+      '<td><span class="tab" style="display:inline-block;pointer-events:none;">'+r.league+'</span></td>' +
+      '<td style="color:var(--accent-3);font-size:.78rem;">'+fmtDate(r.date)+'</td>' +
+      '<td style="font-size:.78rem;color:var(--muted);">'+r.market+'</td>' +
+      '<td style="font-size:.82rem;">'+r.selection+'</td>' +
+      '<td style="font-variant-numeric:tabular-nums;"><b>'+r.decimalOdds.toFixed(2)+'</b> <span style="color:var(--muted);font-size:.7rem;">'+amerText+'</span></td>' +
+      '<td style="font-variant-numeric:tabular-nums;color:var(--accent);">'+r.sm.sharpPct+'%</td>' +
+      '<td style="font-variant-numeric:tabular-nums;color:var(--accent-3);">'+r.sm.ticketPct+'%</td>' +
+      '<td style="font-variant-numeric:tabular-nums;color:'+(r.sm.edgePct>=0?'var(--accent-2)':'var(--danger)')+';">'+(r.sm.edgePct>=0?'+':'')+r.sm.edgePct+'%</td>' +
+      '<td>'+flags.join(' ')+'</td>' +
+      '<td><span class="sm-badge sm-verdict sm-'+r.sm.verdictClass+'">'+r.sm.verdict+'</span></td>' +
+      '</tr>';
+  }).join('') + notice;
+}
+
+// Reemplaza la smRender global con la versión async
+window.smRender = smRenderAsync;
+
+
+
+
+renderFeed();
+renderLegs();
+renderResults();
+smInitFilters();
+smRender();
+</script>
+</body>
+</html>
