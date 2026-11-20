@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema Dinero Inteligente · Polymarket — 5 Grandes Ligas</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#0a0f1c;--panel:#101827;--card:#0d1526;--line:rgba(148,163,184,.16);--txt:#e5eaf3;--mut:#8ea0b5;--sky:#38bdf8;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--pur:#a78bfa;--chip:#1a2437;color-scheme:dark}
+html,body{margin:0;padding:0}
+body{background:radial-gradient(1100px 520px at 85% -10%,rgba(56,189,248,.09),transparent),radial-gradient(900px 480px at -10% 110%,rgba(167,139,250,.08),transparent),var(--bg);color:var(--txt);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:1180px;margin:0 auto;padding:clamp(14px,3vw,28px)}
+a{color:var(--sky);text-decoration:none}
+a:hover{text-decoration:underline}
+h1{font-size:clamp(1.25rem,4.5vw,1.7rem);margin:0 0 4px}
+h2{font-size:clamp(1.1rem,3.5vw,1.35rem);margin:26px 0 12px}
+h3{font-size:1rem;margin:0 0 10px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.sub{color:var(--mut);font-size:clamp(.82rem,2.6vw,.95rem);margin:0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.spread{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:clamp(12px,2.5vw,18px);margin-top:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpi .lab{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+.kpi .val{font-size:clamp(1.05rem,3vw,1.3rem);font-weight:700;margin-top:2px}
+.chip{display:inline-flex;align-items:baseline;gap:6px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px;white-space:normal;text-align:left;max-width:100%}
+.chip.ok{border-color:rgba(52,211,153,.45);color:var(--ok)}
+.chip.warn{border-color:rgba(251,191,36,.45);color:var(--warn)}
+.chip.bad{border-color:rgba(248,113,113,.45);color:var(--bad)}
+.chip.pur{border-color:rgba(167,139,250,.45);color:var(--pur)}
+.chip.sky{border-color:rgba(56,189,248,.45);color:var(--sky)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--mut)}
+.dot.on{background:var(--ok);box-shadow:0 0 8px rgba(52,211,153,.8);animation:pul 1.6s infinite}
+@keyframes pul{50%{opacity:.45}}
+.btn{background:#1b2942;border:1px solid var(--line);color:var(--txt);padding:8px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-family:inherit}
+.btn:hover{background:#22345a}
+.btn.primary{background:var(--sky);border-color:var(--sky);color:#06121f;font-weight:700}
+.btn.primary:hover{background:#5cc9f7}
+.btn.mini{padding:4px 10px;font-size:12.5px;border-radius:8px}
+.nav{display:flex;gap:8px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav .btn{white-space:nowrap;border-radius:999px}
+.nav .btn.active{background:var(--sky);border-color:var(--sky);color:#06121f;font-weight:700}
+.grid5{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}
+.ovcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;transition:border-color .15s}
+.ovcard:hover{border-color:var(--sky)}
+.ovcard.active{border-color:var(--pur);background:linear-gradient(160deg,rgba(167,139,250,.12),var(--card))}
+.ovcard .lg{color:var(--mut);font-size:12.5px}
+.ovcard .team{font-weight:800;font-size:clamp(1rem,3vw,1.15rem);margin:3px 0}
+.dir{background:linear-gradient(135deg,rgba(167,139,250,.13),rgba(56,189,248,.05));border:1px solid rgba(167,139,250,.4);border-radius:16px;padding:clamp(14px,3vw,20px)}
+.dir .big{font-size:clamp(1.4rem,5vw,2rem);font-weight:800;color:var(--pur)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.verdict{margin-top:10px;font-size:14.5px}
+.verdict.ok{color:var(--ok)}.verdict.warn{color:var(--warn)}.verdict.neutral{color:var(--txt)}
+.note{color:var(--mut);font-size:13px;margin-top:10px}
+.brow{margin:12px 0}
+.blabel{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-bottom:5px}
+.blabel .bval{color:var(--mut)}
+.btrack{height:9px;background:#0b1322;border-radius:6px;overflow:hidden;margin-bottom:4px}
+.bfill{height:100%;border-radius:6px;min-width:2px}
+.bfill.mkt{background:linear-gradient(90deg,#38bdf8,#0ea5e9)}
+.bfill.whl{background:linear-gradient(90deg,#a78bfa,#8b5cf6)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--mut);font-size:12.5px;margin:4px 0 8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:660px;font-size:13.5px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{color:var(--mut);font-weight:600;background:#0e1729;position:sticky;top:0}
+th:first-child,td:first-child{text-align:left}
+tr:last-child td{border-bottom:none}
+td .up{color:var(--ok)} td .dn{color:var(--bad)}
+.in{background:#0b1322;border:1px solid var(--line);color:var(--txt);padding:8px 10px;border-radius:10px;font-size:14px;width:100%;font-family:inherit}
+.in:focus{outline:2px solid rgba(56,189,248,.5);border-color:var(--sky)}
+label{font-size:12.5px;color:var(--mut);display:block;margin-bottom:4px}
+.form{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end}
+@media(max-width:760px){.form{grid-template-columns:1fr 1fr}.form .fbtn{grid-column:1/-1}}
+@media(max-width:520px){.form{grid-template-columns:1fr}}
+.evrow{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.evrow .meta{min-width:220px;flex:1}
+.evrow .t{font-weight:600}
+.evrow .d{color:var(--mut);font-size:13px}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:13.5px}
+.feed li .ft{color:var(--mut);font-size:12px}
+pre{margin:0;overflow-x:auto;background:#0b1322;border:1px solid var(--line);border-radius:12px;padding:14px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:#c9d6ea;line-height:1.5;white-space:pre}
+.snip{position:relative;margin-top:10px}
+.snip .btn{position:absolute;top:8px;right:8px}
+ol,ul{padding-left:22px}
+li{margin:6px 0}
+footer{color:var(--mut);font-size:12.5px;margin:26px 0 8px;border-top:1px solid var(--line);padding-top:14px}
+#toasts{position:fixed;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;z-index:50;width:min(420px,calc(100vw - 24px))}
+.toast{background:#132033;border:1px solid rgba(251,191,36,.45);border-left:4px solid var(--warn);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.45);font-size:14px;animation:slide .25s}
+.toast b{color:var(--warn)}
+.toast.info{border-color:rgba(56,189,248,.45);border-left-color:var(--sky)}.toast.info b{color:var(--sky)}
+@keyframes slide{from{transform:translateY(8px);opacity:0}}
+.livebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:14px;font-size:13px}
+.embed-only{display:none}
+body.embed .embed-only{display:block}
+body.embed .full-only{display:none!important}
+body.embed .wrap{padding:12px}
+body.embed .panel{margin-top:10px}
+.mut{color:var(--mut)}
+
+/* ===================== SMART MONEY ALERT BANNER (T-60min) ===================== */
+.sm-alert {
+  position: sticky; top: 0; z-index: 200;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.95) 100%);
+  backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; margin-bottom: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; transition: all 0.3s ease;
+}
+.sm-alert.t60 {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(245, 158, 11, 0.12) 100%);
+  border-color: rgba(251, 191, 36, 0.6); animation: smPulse 2s ease-in-out infinite;
+}
+.sm-alert.live {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(220, 38, 38, 0.12) 100%);
+  border-color: rgba(248, 113, 113, 0.7);
+}
+.sm-alert.empty {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(167, 139, 250, 0.06) 100%);
+}
+@keyframes smPulse {
+  0%, 100% { box-shadow: 0 8px 32px rgba(251, 191, 36, 0.3); }
+  50% { box-shadow: 0 8px 40px rgba(251, 191, 36, 0.55); }
+}
+.sm-alert .sm-icon {
+  font-size: 28px; flex-shrink: 0; width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center; border-radius: 12px;
+  background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.sm-alert.t60 .sm-icon { background: rgba(251, 191, 36, 0.18); border-color: rgba(251, 191, 36, 0.5); }
+.sm-alert.live .sm-icon { background: rgba(248, 113, 113, 0.18); border-color: rgba(248, 113, 113, 0.5); }
+.sm-alert .sm-content { flex: 1; min-width: 200px; }
+.sm-alert .sm-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--sky); margin-bottom: 2px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.sm-alert.t60 .sm-title { color: var(--warn); }
+.sm-alert.live .sm-title { color: var(--bad); }
+.sm-alert .sm-badge-state {
+  font-size: 10px; padding: 2px 8px; border-radius: 999px;
+  background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); letter-spacing: 1px;
+}
+.sm-alert.t60 .sm-badge-state { background: rgba(251, 191, 36, 0.25); border-color: rgba(251, 191, 36, 0.6); }
+.sm-alert.live .sm-badge-state { background: rgba(248, 113, 113, 0.25); border-color: rgba(248, 113, 113, 0.6); }
+.sm-alert .sm-event { font-size: 15px; font-weight: 700; color: var(--txt); margin-bottom: 2px; line-height: 1.3; }
+.sm-alert .sm-direction { font-size: 13px; color: var(--mut); line-height: 1.5; }
+.sm-alert .sm-direction b { color: var(--sky); font-weight: 700; }
+.sm-alert .sm-direction .arrow { color: var(--ok); font-weight: 700; }
+.sm-alert .sm-countdown {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 22px; font-weight: 800; color: var(--txt);
+  letter-spacing: 1px; text-align: right; flex-shrink: 0; min-width: 90px;
+}
+.sm-alert.t60 .sm-countdown { color: var(--warn); }
+.sm-alert.live .sm-countdown { color: var(--bad); }
+.sm-alert .sm-countdown-label { font-size: 10px; color: var(--mut); letter-spacing: 1px; text-transform: uppercase; text-align: right; margin-top: 2px; }
+@media (max-width: 640px) {
+  .sm-alert { padding: 12px 14px; gap: 10px; }
+  .sm-alert .sm-icon { width: 40px; height: 40px; font-size: 22px; }
+  .sm-alert .sm-countdown { font-size: 18px; min-width: 70px; }
+  .sm-alert .sm-event { font-size: 14px; }
+  .sm-alert .sm-direction { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ====== BANNER SMART MONEY T-60min: alerta 1h antes de cada evento ====== -->
+<div id="smAlertBanner" class="sm-alert empty" role="alert" aria-live="polite">
+  <div class="sm-icon" id="smAlertIcon">📡</div>
+  <div class="sm-content">
+    <div class="sm-title" id="smAlertTitle">
+      Smart Money Tracker
+      <span class="sm-badge-state" id="smAlertState">ESPERANDO</span>
+    </div>
+    <div class="sm-event" id="smAlertEvent">Cargando próximos eventos…</div>
+    <div class="sm-direction" id="smAlertDirection">Analizando concentración ballena en Polymarket.</div>
+  </div>
+  <div style="text-align:right;">
+    <div class="sm-countdown" id="smAlertCountdown">--:--</div>
+    <div class="sm-countdown-label" id="smAlertCountdownLabel">para inicio</div>
+  </div>
+</div>
+
+<!-- Barra de navegación cruzada entre las 3 herramientas -->
+<nav style="display:flex;flex-wrap:wrap;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:14px;font-size:13px">
+  <a href="index.html" style="padding:6px 12px;border-radius:8px;background:var(--chip);border:1px solid var(--line);color:var(--txt);text-decoration:none">🏠 Inicio</a>
+  <a href="Parley_Tata_Iraka_2026-27.html" style="padding:6px 12px;border-radius:8px;background:var(--chip);border:1px solid var(--line);color:var(--txt);text-decoration:none">🎯 Tata Iraka</a>
+  <a href="Parley_Linemate_2026-27.html" style="padding:6px 12px;border-radius:8px;background:var(--chip);border:1px solid var(--line);color:var(--txt);text-decoration:none">📊 Linemate</a>
+  <a href="Sistema_Dinero_Inteligente_Polymarket_2026-27.html" style="padding:6px 12px;border-radius:8px;background:var(--sky);border:1px solid var(--sky);color:#06121f;font-weight:700;text-decoration:none">🐋 Polymarket (aquí)</a>
+</nav>
+
+<header class="full-only" style="padding-top:6px">
+  <div class="spread">
+    <div>
+      <h1>🐋 Sistema Dinero Inteligente · Polymarket</h1>
+      <p class="sub">5 grandes ligas europeas · Mercados de campeón <span id="lblSeason"></span> · Instantánea: <span id="lblSnap"></span></p>
+    </div>
+    <div class="chips">
+      <span class="chip pur">Datos reales capturados de la API pública de Polymarket</span>
+    </div>
+  </div>
+  <nav class="nav" style="margin-top:14px">
+    <button class="btn active" data-sec="panel">📊 Panel</button>
+    <button class="btn" data-sec="alerts">⏰ Alertas T-60</button>
+    <button class="btn" data-sec="integr">🔌 Integración</button>
+    <button class="btn" data-sec="method">📖 Método</button>
+  </nav>
+</header>
+
+<div class="livebar" id="livebar">
+  <span class="chip" id="liveChip"><span class="dot" id="liveDot"></span><span id="liveTxt">Comprobando conexión en vivo…</span></span>
+  <span class="row">
+    <span class="chip warn" id="nextChip">Sin eventos programados</span>
+    <button class="btn mini" id="btnRetry">🔄 Reintentar en vivo</button>
+    <span class="mut" id="lastSync"></span>
+  </span>
+</div>
+
+<main>
+  <!-- ============ PANEL ============ -->
+  <section id="sec-panel">
+    <div class="panel">
+      <h3>Resumen · ¿Hacia dónde va el dinero fuerte?</h3>
+      <div class="grid5" id="overview"></div>
+    </div>
+
+    <div class="panel" id="leagueView">
+      <div class="spread">
+        <h2 id="lgTitle" style="margin:0"></h2>
+        <a id="lgLink" href="#" target="_blank" rel="noopener">Ver en Polymarket ↗</a>
+      </div>
+      <p class="sub" id="lgSlug"></p>
+      <div class="kpis" id="lgKpis" style="margin-top:12px"></div>
+
+      <div class="dir" id="dirCard" style="margin-top:14px"></div>
+
+      <h2>Capital ballena vs. precio de mercado — top 8 equipos</h2>
+      <div class="legend">
+        <span><i style="background:linear-gradient(90deg,#38bdf8,#0ea5e9)"></i>Precio de mercado (probabilidad implícita)</span>
+        <span><i style="background:linear-gradient(90deg,#a78bfa,#8b5cf6)"></i>% del capital ballena (YES)</span>
+      </div>
+      <div id="bars"></div>
+
+      <h2>Detalle por equipo</h2>
+      <div class="tscroll" id="tblTeams"></div>
+
+      <h2>🐋 Top 15 carteras (ballenas) de esta liga</h2>
+      <div class="tscroll" id="tblWallets"></div>
+    </div>
+  </section>
+
+  <!-- ============ ALERTAS T-60 ============ -->
+  <section id="sec-alerts" class="full-only" style="display:none">
+    <div class="panel">
+      <h2 style="margin-top:0">⏰ Motor de alertas con 1 hora de antelación</h2>
+      <p>El motor vigila los eventos que programes (partidos, jornadas, cierres de mercado). <b>60 minutos antes de cada evento</b> calcula automáticamente hacia dónde va el capital fuerte de esa liga y te avisa de tres formas: aviso en pantalla (toast), notificación del navegador y un mensaje <code>postMessage</code> para que la página de apuestas anfitriona reaccione.</p>
+      <div class="row" style="margin:12px 0">
+        <button class="btn" id="btnPerm">🔔 Activar notificaciones del navegador</button>
+        <button class="btn primary" id="btnDemo">🚨 Probar alerta ahora (demo)</button>
+        <button class="btn" id="btnClean">🧹 Eliminar eventos de ejemplo</button>
+      </div>
+      <div class="card">
+        <h3>Programar evento</h3>
+        <div class="form">
+          <div>
+            <label for="fLeague">Liga</label>
+            <select class="in" id="fLeague"></select>
+          </div>
+          <div>
+            <label for="fTitle">Nombre del evento</label>
+            <input class="in" id="fTitle" placeholder="Ej.: Barcelona vs Real Madrid">
+          </div>
+          <div>
+            <label for="fTs">Fecha y hora (inicio)</label>
+            <input class="in" id="fTs" type="datetime-local">
+          </div>
+          <div class="fbtn"><button class="btn primary" id="btnAdd" style="width:100%">➕ Programar</button></div>
+        </div>
+        <p class="note">Los eventos se guardan en tu navegador (localStorage). Los 3 que aparecen precargados son <b>EJEMPLOS</b> — edítalos o elimínalos y añade los partidos reales de tu página de apuestas.</p>
+      </div>
+      <h2>Eventos programados</h2>
+      <div id="evList"></div>
+      <h2>Historial de alertas disparadas</h2>
+      <ul class="feed" id="feedList"></ul>
+    </div>
+  </section>
+
+  <!-- ============ INTEGRACIÓN ============ -->
+  <section id="sec-integr" class="full-only" style="display:none">
+    <div class="panel">
+      <h2 style="margin-top:0">🔌 Integración en otra página de apuestas</h2>
+      <p>El sistema funciona como <b>widget embebible</b>. Añade <code>?embed=1</code> a la URL y muestra solo el panel compacto (liga activa, dirección del dinero fuerte y alertas), listo para un <code>&lt;iframe&gt;</code>.</p>
+      <h3 style="margin-top:18px">Paso 1 · Incrustar el widget</h3>
+      <div class="snip"><button class="btn mini" data-copy="snip1">📋 Copiar</button><pre><code id="snip1">&lt;iframe
+  src="sistema_dinero_inteligente_polymarket.html?embed=1"
+  width="100%" height="520"
+  style="border:0;border-radius:14px"
+  title="Dinero inteligente Polymarket"
+  loading="lazy"&gt;
+&lt;/iframe&gt;</code></pre></div>
+      <h3 style="margin-top:18px">Paso 2 · Escuchar las alertas T-60 desde tu página</h3>
+      <div class="snip"><button class="btn mini" data-copy="snip2">📋 Copiar</button><pre><code id="snip2">&lt;script&gt;
+window.addEventListener('message', function (e) {
+  var d = e.data || {};
+  if (d.source !== 'pm-smart-money') return;
+  if (d.type === 'PM_SMART_ALERT') {
+    // Alerta disparada 60 min antes del evento
+    // d.league, d.team, d.sharePct, d.priceCents,
+    // d.event, d.kickoffISO, d.msg
+    console.log('Alerta T-60:', d.msg);
+  }
+  if (d.type === 'PM_SMART_FLOW') {
+    // Movimiento de precio detectado en vivo (CLOB)
+    // d.league, d.team, d.fromCents, d.toCents, d.deltaPp
+  }
+  if (d.type === 'PM_SMART_STATE') {
+    // Estado completo de las 5 ligas (líder, % capital,
+    // precio, divergencia) — llega al cargar el widget
+  }
+});
+&lt;/script&gt;</code></pre></div>
+      <h3 style="margin-top:18px">Paso 3 · Controlar el widget desde la página anfitriona</h3>
+      <div class="snip"><button class="btn mini" data-copy="snip3">📋 Copiar</button><pre><code id="snip3">var w = document.querySelector('iframe[src*="sistema_dinero_inteligente"]');
+// Pedir el estado actual:
+w.contentWindow.postMessage({ source: 'pm-smart-money', type: 'PM_SMART_READY' }, '*');
+// Cambiar de liga en el widget:
+w.contentWindow.postMessage({ source: 'pm-smart-money', type: 'PM_SMART_SET_LEAGUE',
+  league: 'La Liga' }, '*');</code></pre></div>
+      <h3 style="margin-top:18px">Mensajes que emite el widget</h3>
+      <div class="tscroll"><table style="min-width:560px">
+        <thead><tr><th>Mensaje</th><th>Cuándo</th><th>Campos</th></tr></thead>
+        <tbody>
+          <tr><td>PM_SMART_STATE</td><td>Al cargar y al recibir PM_SMART_READY</td><td style="text-align:left">leagues[] (league, leader, sharePct, priceCents, divPp, conviction, volTotal…)</td></tr>
+          <tr><td>PM_SMART_ALERT</td><td>T-60 min antes de cada evento programado</td><td style="text-align:left">league, event, team, sharePct, priceCents, kickoffISO, msg</td></tr>
+          <tr><td>PM_SMART_FLOW</td><td>Movimiento de precio ≥ 3 pp detectado en vivo</td><td style="text-align:left">league, team, fromCents, toCents, deltaPp</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Todos los mensajes llevan <code>source: "pm-smart-money"</code> para filtrarlos. El widget no accede a cookies ni datos de la página anfitriona.</p>
+    </div>
+  </section>
+
+  <!-- ============ MÉTODO ============ -->
+  <section id="sec-method" class="full-only" style="display:none">
+    <div class="panel">
+      <h2 style="margin-top:0">📖 Método de cálculo</h2>
+      <h3>Fuente de datos</h3>
+      <ul>
+        <li><b>Mercados analizados:</b> los 5 mercados de <b>CAMPEÓN de temporada <span id="lblSeason2"></span></b> de Polymarket (Premier League, LaLiga, Serie A, Bundesliga, Ligue 1).</li>
+        <li><b>Instantánea capturada:</b> <span id="lblSnap2"></span>, vía API pública de Polymarket (Gamma API para precios/volúmenes y Data API para posiciones on-chain de las carteras más grandes).</li>
+        <li><b>Modo en vivo:</b> el sistema consulta el CLOB de Polymarket (<code>clob.polymarket.com/midpoint</code>) cada 60 s para los 3 favoritos de cada liga. Si el navegador o la red bloquean la llamada, queda en modo instantánea embebida y lo indica en la barra de estado.</li>
+      </ul>
+      <h3>Cálculos</h3>
+      <ul>
+        <li><b>Probabilidad implícita:</b> precio YES del token × 100 (ej.: 0,695 → 69,5%).</li>
+        <li><b>Concentración ballena:</b> capital YES de las carteras grandes sobre ese equipo ÷ capital ballena YES total de la liga. Es la lectura principal de <b>hacia dónde va el dinero fuerte</b>.</li>
+        <li><b>Divergencia (pp):</b> concentración ballena − probabilidad implícita. Positiva = las ballenas están más expuestas a ese equipo de lo que el precio implica (señal de convicción); negativa = lo contrario.</li>
+        <li><b>Índice de convicción (0–100):</b> 0,6 × concentración + 0,4 × min(100, 3·|divergencia|). Resume intensidad y desacuerdo con el mercado.</li>
+        <li><b>Capital NO:</b> en un mercado de campeón, comprar NO de un no favorito equivale a reforzar a los favoritos. Por eso el NO aparece casi idéntico en todos los equipos de cuota baja: es una posición estructural a favor de los favoritos, no una apuesta contra cada uno.</li>
+        <li><b>Detector de flujo:</b> compara el precio en vivo con la instantánea; si varía ≥ 3 pp en un favorito, emite PM_SMART_FLOW y un aviso.</li>
+      </ul>
+      <h3>Alerta T-60</h3>
+      <ul>
+        <li>Cada evento programado entra en <b>ventana de alerta 60 minutos antes</b> de su inicio. En ese momento el sistema recalcula el líder de capital ballena de esa liga (con precio en vivo si está disponible) y dispara toast + notificación + postMessage.</li>
+        <li>Los eventos y el historial se guardan en tu navegador; nada sale de tu equipo.</li>
+      </ul>
+      <h3>Limitaciones</h3>
+      <ul>
+        <li>Los mercados de campeón son de temporada larga: el “dinero fuerte” aquí refleja convicción sobre el título, no sobre partidos individuales.</li>
+        <li>La instantánea tiene la fecha indicada; los precios en vivo (si hay conexión) corrigen la deriva desde entonces.</li>
+        <li>Herramienta informativa de lectura de mercado. <b>No es asesoramiento financiero ni recomendación de apuesta.</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ WIDGET: alertas compactas (embed) ============ -->
+  <section id="sec-widget" class="embed-only">
+    <div class="panel">
+      <h3 style="margin-bottom:4px">⏰ Próxima alerta T-60</h3>
+      <div id="wNext" style="font-size:14px">Sin eventos programados</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn mini primary" id="btnDemo2">🚨 Probar alerta</button>
+      </div>
+      <h3 style="margin-top:16px">Últimas alertas</h3>
+      <ul class="feed" id="feedList2"></ul>
+    </div>
+  </section>
+</main>
+
+<footer class="full-only">
+  <b>Aviso:</b> herramienta informativa de lectura de mercado. No es asesoramiento financiero ni una recomendación de apuesta. Datos: instantánea propia de la API pública de Polymarket (<span id="lblSnap3"></span>) sobre los mercados de campeón <span id="lblSeason3"></span>. Precios en vivo vía CLOB público de Polymarket cuando la red lo permite.
+</footer>
+
+</div>
+<div id="toasts"></div>
+
+<script>
+const DATA = {"snapshot":"17/11/2026","season":"2026/27","leagues":{"Premier League":{"slug":"epl-2027-champion-20260701200428749","title":"EPL: 2027 Champion","volTotal":25926569,"vol24":13074,"liq":11023308,"teams":[{"team":"Arsenal","price":0.765,"bid":0.76,"ask":0.77,"vol":1391763,"vol24":243.3,"liq":108908,"wy":819510.8,"wn":253721.19,"token":"106464589845250400124249015666766731317110899241411841699938652823328750757436"},{"team":"Brighton","price":0.0655,"bid":0.065,"ask":0.066,"vol":1302694,"vol24":1910.6,"liq":154834,"wy":62540.14,"wn":893981.82,"token":"9221383556608449303835174806846320148935846556873035382860978740383478459961"},{"team":"Manchester City","price":0.065,"bid":0.06,"ask":0.07,"vol":3563486,"vol24":2176.6,"liq":241689,"wy":124320.4,"wn":1809849.28,"token":"19864216715488298679276291756659013279877343825699353033505020208765688353462"},{"team":"Liverpool","price":0.0535,"bid":0.051,"ask":0.056,"vol":1307408,"vol24":1952.2,"liq":120727,"wy":49865.46,"wn":893879.29,"token":"103113680967506285415247199316434245544375452747327929231569806258054261426999"},{"team":"Chelsea","price":0.0145,"bid":0.013,"ask":0.016,"vol":1297931,"vol24":1727.9,"liq":157173,"wy":13128.88,"wn":933564.77,"token":"71331397742700941957031238831543083934039786198089976413635532604236046151616"},{"team":"Manchester United","price":0.0065,"bid":0.005,"ask":0.008,"vol":1456496,"vol24":0.0,"liq":206333,"wy":6009.76,"wn":933902.28,"token":"73050236093508473398082398966067213274195424600650056280148681977814431775527"},{"team":"Tottenham","price":0.0035,"bid":0.003,"ask":0.004,"vol":1582536,"vol24":3955.1,"liq":315795,"wy":3273.37,"wn":936255.4,"token":"77697374688933463558435808435207573631234398437151747716737073005939751357574"},{"team":"Aston Villa","price":0.0025,"bid":0.002,"ask":0.003,"vol":1094633,"vol24":268.0,"liq":649346,"wy":2343.59,"wn":935235.12,"token":"95126052608609363478306594089235169822133598679009177544767568245943920599687"},{"team":"Bournemouth","price":0.0015,"bid":0.001,"ask":0.002,"vol":1825923,"vol24":354.9,"liq":915914,"wy":1405.68,"wn":935697.28,"token":"91726864593742693140356430310829013967102600293867040357906510030347902441142"},{"team":"Hull City","price":0.0015,"bid":0.001,"ask":0.002,"vol":1437139,"vol24":462.6,"liq":104375,"wy":1407.46,"wn":936915.88,"token":"19129084106918074389743466444184546964159320576683957544376689640092328831272"},{"team":"Brentford","price":0.0005,"bid":null,"ask":0.001,"vol":1757951,"vol24":22.4,"liq":593650,"wy":468.29,"wn":936087.0,"token":"77148715104272769172722280105773295379821478844848869024067051231521185499856"},{"team":"Crystal Palace","price":0.0005,"bid":null,"ask":0.001,"vol":1220470,"vol24":0.0,"liq":951373,"wy":468.27,"wn":936023.59,"token":"97051520858342010708470643796325110847356418185297997362901024578514854753269"},{"team":"Everton","price":0.0005,"bid":null,"ask":0.001,"vol":922142,"vol24":0.0,"liq":737149,"wy":468.24,"wn":936016.99,"token":"80367005308757874454920246636237476898466725678692332165499458085317111212451"},{"team":"Fulham","price":0.0005,"bid":null,"ask":0.001,"vol":601622,"vol24":0.0,"liq":805520,"wy":468.25,"wn":936034.51,"token":"40670748580170120208061318459069689124456381187574341481753537331619244535492"},{"team":"Leeds United","price":0.0005,"bid":null,"ask":0.001,"vol":1300362,"vol24":0.0,"liq":645722,"wy":468.38,"wn":936253.86,"token":"35746559934598687044244313512841185288491694151858023596582191133240765938021"},{"team":"Newcastle United","price":0.0005,"bid":null,"ask":0.001,"vol":1112915,"vol24":0.0,"liq":728834,"wy":468.29,"wn":936136.37,"token":"70115295607678639389849027942930100443106188440422945198953091431001090853177"},{"team":"Nottingham Forest","price":0.0005,"bid":null,"ask":0.001,"vol":753716,"vol24":0.0,"liq":898323,"wy":468.24,"wn":936048.1,"token":"71402273816533867130174046379312855601204787736023388471372994030309720329642"},{"team":"Sunderland","price":0.0005,"bid":null,"ask":0.001,"vol":789838,"vol24":0.0,"liq":929850,"wy":468.25,"wn":936036.39,"token":"99368121462700780151196311832350788198349977216794379898015805289217999809122"},{"team":"Coventry City","price":0.0005,"bid":null,"ask":0.001,"vol":656422,"vol24":0.0,"liq":917286,"wy":468.26,"wn":936081.17,"token":"10784100828022677663858912622917977215638901416732605478905545794493860458841"},{"team":"Ipswich Town","price":0.0005,"bid":null,"ask":0.001,"vol":551121,"vol24":0.0,"liq":837075,"wy":468.24,"wn":936024.32,"token":"5348126322712501809599521011070859211804814998517334817342155958439551325980"}],"wallets":[{"name":"BreakTheBank","usd":351185.55,"bet":"Arsenal"},{"name":"ballena","usd":228614.3,"bet":"Arsenal"},{"name":"RJW1","usd":71499.96,"bet":"Manchester City"},{"name":"leegunner","usd":37226.38,"bet":"Arsenal"},{"name":"Thalantyr","usd":27407.83,"bet":"Arsenal"},{"name":"bc7g","usd":21010.44,"bet":"Arsenal"},{"name":"saintaphextwin","usd":20886.65,"bet":"Brighton"},{"name":"tnl","usd":20579.23,"bet":"Manchester City"},{"name":"3musketeers","usd":19125.01,"bet":"Arsenal"},{"name":"numbernine","usd":18942.03,"bet":"Arsenal"},{"name":"button-clicker","usd":14764.49,"bet":"Brighton"},{"name":"ndb1","usd":11590.77,"bet":"Arsenal"},{"name":"over.","usd":8554.04,"bet":"Arsenal"},{"name":"vcmn","usd":7405.04,"bet":"Arsenal"},{"name":"AmphibiousCaldwellPope","usd":7295.69,"bet":"Arsenal"}]},"La Liga":{"slug":"laliga-2027-champion-20260701200737375","title":"LALIGA: 2027 Champion","volTotal":9763884,"vol24":11164,"liq":6093107,"teams":[{"team":"Barcelona","price":0.695,"bid":0.69,"ask":0.7,"vol":780013,"vol24":4.5,"liq":297582,"wy":222188.04,"wn":97988.03,"token":"78000288950683689025029690066756773560403178897442713372002372085573604431292"},{"team":"Real Madrid","price":0.265,"bid":0.26,"ask":0.27,"vol":825324,"vol24":597.5,"liq":269903,"wy":71454.33,"wn":203126.41,"token":"42357151343332687280234811440515873266579625243133461094036465284179642296484"},{"team":"Atlético Madrid","price":0.0145,"bid":0.013,"ask":0.016,"vol":697969,"vol24":3108.4,"liq":160817,"wy":3899.61,"wn":265891.08,"token":"104306566889574124755791577915746121890592516932087427322573979257199835868466"},{"team":"Betis","price":0.0025,"bid":0.002,"ask":0.003,"vol":578266,"vol24":785.8,"liq":237848,"wy":673.5,"wn":268728.14,"token":"10313073926527731061084427866073842487970457164047480167734118236155304952250"},{"team":"Alavés","price":0.0015,"bid":0.001,"ask":0.002,"vol":651968,"vol24":1918.9,"liq":338774,"wy":403.72,"wn":268745.29,"token":"61127404499122113418296509856304616952314004224208544810194190945525104776727"},{"team":"Villarreal","price":0.0015,"bid":0.001,"ask":0.002,"vol":1555520,"vol24":4742.4,"liq":313052,"wy":403.8,"wn":268795.26,"token":"113425062535644332921371280980545220084690407039886754096111209549228191875637"},{"team":"Athletic Bilbao","price":0.0005,"bid":null,"ask":0.001,"vol":293829,"vol24":0.0,"liq":284000,"wy":134.29,"wn":268485.57,"token":"114017983786359422603889037533885529892108203453289278096466745309910256617475"},{"team":"Celta Vigo","price":0.0005,"bid":null,"ask":0.001,"vol":384195,"vol24":0.0,"liq":310494,"wy":134.29,"wn":268453.04,"token":"62697373450436189008971692805086523587186420161749313274272920658436882132102"},{"team":"Espanyol","price":0.0005,"bid":null,"ask":0.001,"vol":312551,"vol24":0.0,"liq":310822,"wy":134.29,"wn":268453.06,"token":"23038799501419373036515876628442894408542440525173582527852234161079225982857"},{"team":"Getafe","price":0.0005,"bid":null,"ask":0.001,"vol":324565,"vol24":0.0,"liq":309784,"wy":134.28,"wn":268453.06,"token":"91684328161521747986730258685179916401469759070937541594056143376011441940715"},{"team":"Osasuna","price":0.0005,"bid":null,"ask":0.001,"vol":322996,"vol24":6.8,"liq":318165,"wy":134.29,"wn":268453.06,"token":"45821472054224115170466506438119984711319670612588394893766263892668920972840"},{"team":"Rayo Vallecano","price":0.0005,"bid":null,"ask":0.001,"vol":349156,"vol24":0.0,"liq":321876,"wy":134.3,"wn":268453.04,"token":"14834151501367902902814629414291157617362778611016536624855988737349098046069"},{"team":"Real Sociedad","price":0.0005,"bid":null,"ask":0.001,"vol":318852,"vol24":0.0,"liq":286640,"wy":134.29,"wn":268453.05,"token":"55425772479710688798295912202614534105139670844610119759346246369439265491082"},{"team":"Sevilla","price":0.0005,"bid":null,"ask":0.001,"vol":588709,"vol24":0.0,"liq":282377,"wy":134.28,"wn":268453.09,"token":"35612016242198072428734492254411526590176190680676763180799235711086942662735"},{"team":"Valencia","price":0.0005,"bid":null,"ask":0.001,"vol":403729,"vol24":0.0,"liq":317366,"wy":134.29,"wn":268453.06,"token":"113856516411902078133427566368852236833870789727066405019343538788694110761753"},{"team":"Levante","price":0.0005,"bid":null,"ask":0.001,"vol":470261,"vol24":0.0,"liq":311651,"wy":134.3,"wn":268453.04,"token":"20472722907092688700638117423141603499690883597155540750680125930393480319762"},{"team":"Elche","price":0.0005,"bid":null,"ask":0.001,"vol":68498,"vol24":0.0,"liq":300265,"wy":134.3,"wn":268453.04,"token":"63417157495196382430996905017121612734673406085574138330923327709663180217752"},{"team":"Racing Santander","price":0.0005,"bid":null,"ask":0.001,"vol":402840,"vol24":0.0,"liq":304090,"wy":134.29,"wn":268453.04,"token":"71840571234588363977283925354826500488291892342884137962983153821334517927886"},{"team":"Deportivo La Coruña","price":0.0005,"bid":null,"ask":0.001,"vol":366222,"vol24":0.0,"liq":271985,"wy":134.3,"wn":268453.06,"token":"41395045193115370015902004784978378171099862358016741224390183632730189676406"},{"team":"Málaga","price":0.0005,"bid":null,"ask":0.001,"vol":65174,"vol24":0.0,"liq":293648,"wy":134.3,"wn":268453.04,"token":"48850660788872148205146943914158189790959522620610106221822575806051640516419"},{"team":"Team C","price":0.0005,"bid":null,"ask":0.001,"vol":3246,"vol24":0.0,"liq":253214,"wy":134.3,"wn":268453.04,"token":"111633517987020864528342944654137706608236983103603121979585653465358681056003"}],"wallets":[{"name":"ndb1","usd":63243.15,"bet":"Barcelona"},{"name":"Runner109","usd":47119.83,"bet":"Barcelona"},{"name":"0xf088d3e04b955be470a221A3e7830d2282F9e6C4-1778078728176","usd":27799.99,"bet":"Barcelona"},{"name":"ImBruceWayne","usd":14932.21,"bet":"Barcelona"},{"name":"Bigbadwolf1","usd":13624.68,"bet":"Real Madrid"},{"name":"timebrotime","usd":11928.28,"bet":"Barcelona"},{"name":"0x50D80f6EDF998FA4B3982DC449Fc6c5565E3d896-1773770203770","usd":11626.87,"bet":"Barcelona"},{"name":"skywalker877","usd":8402.75,"bet":"Barcelona"},{"name":"gremal","usd":6121.92,"bet":"Real Madrid"},{"name":"tnl","usd":5077.32,"bet":"Barcelona"},{"name":"marksoc","usd":4761.87,"bet":"Barcelona"},{"name":"yuahldj","usd":4150.39,"bet":"Barcelona"},{"name":"P1kaso","usd":3918.87,"bet":"Barcelona"},{"name":"hbhb11","usd":3771.03,"bet":"Barcelona"},{"name":"cigarettes","usd":3751.21,"bet":"Real Madrid"}]},"Serie A":{"slug":"serie-a-2027-champion-20260701200118390","title":"Serie A: 2027 Champion","volTotal":1129282,"vol24":3603,"liq":1501862,"teams":[{"team":"Inter Milan","price":0.615,"bid":0.61,"ask":0.62,"vol":129196,"vol24":10.0,"liq":212089,"wy":30033.03,"wn":18809.32,"token":"68839366331464964800945286369500150021348607346986921760322623630330218373790"},{"team":"Roma","price":0.1655,"bid":0.161,"ask":0.17,"vol":100075,"vol24":217.7,"liq":78632,"wy":5079.8,"wn":25641.32,"token":"62907994877464307886499457878765857762528607490409153039214572728077305671690"},{"team":"Como","price":0.056,"bid":0.054,"ask":0.058,"vol":77248,"vol24":430.6,"liq":69398,"wy":1839.65,"wn":31011.26,"token":"78576358305558347318284187326618868090456124349854823806171017012532472544517"},{"team":"Lazio","price":0.053,"bid":0.052,"ask":0.054,"vol":47411,"vol24":111.0,"liq":66825,"wy":1611.91,"wn":28801.89,"token":"1848113643517668174210897493863093875851585726215323151190727199794990725645"},{"team":"AC Milan","price":0.051,"bid":0.05,"ask":0.052,"vol":58829,"vol24":27.0,"liq":70940,"wy":1505.18,"wn":28008.89,"token":"109832092015398655009185437617352263867292611038206287116003464468979086427396"},{"team":"Juventus","price":0.0165,"bid":0.016,"ask":0.017,"vol":48766,"vol24":1093.5,"liq":65559,"wy":478.64,"wn":28529.27,"token":"97849062586082240578036032647035619225137793226410083889991849240363525098151"},{"team":"Napoli","price":0.006,"bid":0.005,"ask":0.007,"vol":42583,"vol24":0.0,"liq":78057,"wy":163.91,"wn":27160.07,"token":"17686994828588599161235603943983605386903554520844021461031398015360726937580"},{"team":"Atalanta","price":0.0045,"bid":0.002,"ask":0.007,"vol":36027,"vol24":1713.5,"liq":83204,"wy":122.4,"wn":27078.32,"token":"91143514965090680884386672505856329057977980150353843348039495404655021678989"},{"team":"Bologna","price":0.0005,"bid":null,"ask":0.001,"vol":103939,"vol24":0.0,"liq":55127,"wy":13.58,"wn":27179.54,"token":"32917723775345686995606810124941792547936473369487827761118930967848216317744"},{"team":"Cagliari","price":0.0005,"bid":null,"ask":0.001,"vol":32145,"vol24":0.0,"liq":68060,"wy":13.61,"wn":27179.49,"token":"27637162454505113770297512120327770206034505073963871838893283221153152642633"},{"team":"Fiorentina","price":0.0005,"bid":null,"ask":0.001,"vol":26867,"vol24":0.0,"liq":60842,"wy":13.6,"wn":27179.53,"token":"53546481234543861232917957110834130016748384158852247524180640667124335703877"},{"team":"Genoa","price":0.0005,"bid":null,"ask":0.001,"vol":91884,"vol24":0.0,"liq":58173,"wy":13.62,"wn":27184.53,"token":"83031696683016995065783550023004933095527666624718965398142830356280863547695"},{"team":"Lecce","price":0.0005,"bid":null,"ask":0.001,"vol":60195,"vol24":0.0,"liq":57636,"wy":13.63,"wn":27206.13,"token":"56462069090657743216446973105807863200188750964121065419864972395905579017588"},{"team":"Parma","price":0.0005,"bid":null,"ask":0.001,"vol":17783,"vol24":0.0,"liq":66873,"wy":13.6,"wn":27179.48,"token":"40975949942295519155673452934389008526593088711625705473127511498866363994583"},{"team":"Sassuolo","price":0.0005,"bid":null,"ask":0.001,"vol":18181,"vol24":0.0,"liq":67916,"wy":13.61,"wn":27179.53,"token":"76391576723497127054357312531662615965920072689673101852963953182641942196753"},{"team":"Torino","price":0.0005,"bid":null,"ask":0.001,"vol":59874,"vol24":0.0,"liq":82717,"wy":13.61,"wn":27220.05,"token":"97419872576079268761508567949086432581496171067080264814918331932574047264375"},{"team":"Udinese","price":0.0005,"bid":null,"ask":0.001,"vol":18569,"vol24":0.0,"liq":67849,"wy":13.61,"wn":27179.54,"token":"51186059011693341134398122527061626497427351186437476889289995398842830920205"},{"team":"Venezia","price":0.0005,"bid":null,"ask":0.001,"vol":42705,"vol24":0.0,"liq":66945,"wy":13.63,"wn":27184.48,"token":"74217114781620827730411030659397493060110234830253717450615693217922417567114"},{"team":"Frosinone","price":0.0005,"bid":null,"ask":0.001,"vol":96663,"vol24":0.0,"liq":57218,"wy":13.62,"wn":27179.5,"token":"23922254711862116211859999639431183193612120462123866807891571704182263684249"},{"team":"Monza","price":0.0005,"bid":null,"ask":0.001,"vol":20343,"vol24":0.0,"liq":65891,"wy":13.62,"wn":27179.48,"token":"105347559227348343217110845790416468033026442671802355717963729464551834425436"}],"wallets":[{"name":"Cyberflems","usd":5924.91,"bet":"Inter Milan"},{"name":"Tobias1909","usd":3642.01,"bet":"Inter Milan"},{"name":"Alegrandebig","usd":2445.02,"bet":"Inter Milan"},{"name":"SirTomJones","usd":2103.48,"bet":"Inter Milan"},{"name":"","usd":1792.2,"bet":"Inter Milan"},{"name":"ste937","usd":1638.5,"bet":"Inter Milan"},{"name":"cigarettes","usd":1247.48,"bet":"Inter Milan"},{"name":"tnl","usd":1193.1,"bet":"Inter Milan"},{"name":"TimeTraveler","usd":969.32,"bet":"Lazio"},{"name":"Hjklm","usd":827.68,"bet":"Como"},{"name":"CryptoMaster888","usd":819.99,"bet":"Inter Milan"},{"name":"0x66E7ce01C6831B8A2503D09eDD6167152Ee68BcD-1771870353938","usd":803.39,"bet":"Inter Milan"},{"name":"terrancetao","usd":799.5,"bet":"Inter Milan"},{"name":"tunemahpeak","usd":684.72,"bet":"Inter Milan"},{"name":"Six000000","usd":628.51,"bet":"Inter Milan"}]},"Bundesliga":{"slug":"bundesliga-2027-champion-20260708164840303","title":"Bundesliga: 2027 Champion","volTotal":1498672,"vol24":4205,"liq":1010714,"teams":[{"team":"Bayern Munich","price":0.875,"bid":0.87,"ask":0.88,"vol":106918,"vol24":8.0,"liq":291204,"wy":37396.67,"wn":5342.42,"token":"86188390496703366215739080277587861472902262344214874797731409104844551918626"},{"team":"Borussia Dortmund","price":0.065,"bid":0.06,"ask":0.07,"vol":67562,"vol24":28.5,"liq":51242,"wy":2670.39,"wn":38412.4,"token":"71505643993753772241028585420023787018058707557413087432629400348265668860690"},{"team":"Bayer Leverkusen","price":0.012,"bid":0.008,"ask":0.016,"vol":58201,"vol24":330.0,"liq":49185,"wy":453.28,"wn":37320.52,"token":"100060331442656974186607648115977399082504467341822312262049848957428260473698"},{"team":"RB Leipzig","price":0.01,"bid":0.008,"ask":0.012,"vol":43167,"vol24":0.0,"liq":40974,"wy":377.12,"wn":37337.25,"token":"42798148154164534510644890061289863682332504334197903605889329837125481872803"},{"team":"SC Freiburg","price":0.01,"bid":0.003,"ask":0.017,"vol":76744,"vol24":0.0,"liq":38578,"wy":376.25,"wn":37249.55,"token":"22175333496127081469990198415425480769050614407477193039195458572751419549061"},{"team":"Werder Bremen","price":0.0075,"bid":0.002,"ask":0.013,"vol":115769,"vol24":0.0,"liq":40632,"wy":381.79,"wn":50527.0,"token":"77524000513829062702810289080584019682183672400973994704039965924319360699764"},{"team":"FC Augsburg","price":0.0065,"bid":0.006,"ask":0.007,"vol":96721,"vol24":0.0,"liq":30346,"wy":244.54,"wn":37381.24,"token":"64070925547499234446631927807897129369984403719350781164743237500963004998594"},{"team":"Eintracht Frankfurt","price":0.0045,"bid":0.003,"ask":0.006,"vol":82595,"vol24":0.0,"liq":46157,"wy":170.45,"wn":37708.66,"token":"42161953630934766083416065140109500793814054619271319756033596085131058754074"},{"team":"VfB Stuttgart","price":0.0015,"bid":0.001,"ask":0.002,"vol":67094,"vol24":0.0,"liq":53494,"wy":56.52,"wn":37627.62,"token":"93232334389237716100156268980958321700015901078209946394286319002150902868790"},{"team":"TSG Hoffenheim","price":0.0015,"bid":0.001,"ask":0.002,"vol":81229,"vol24":1453.4,"liq":35830,"wy":56.42,"wn":37570.37,"token":"2221225813920842989950605857423540997640465465561152967238793915579456222849"},{"team":"Mainz 05","price":0.0015,"bid":0.001,"ask":0.002,"vol":98152,"vol24":0.0,"liq":34541,"wy":56.42,"wn":37570.39,"token":"91078037111220486655674503918729686149867922596172164208793464947381978664468"},{"team":"Schalke 04","price":0.0015,"bid":0.001,"ask":0.002,"vol":82714,"vol24":1911.0,"liq":34383,"wy":56.47,"wn":37608.27,"token":"106111908308709565621166592076393089553518294016586487615984258191200660493030"},{"team":"Borussia Mönchengladbach","price":0.0005,"bid":null,"ask":0.001,"vol":77590,"vol24":0.0,"liq":39392,"wy":18.78,"wn":37607.02,"token":"3623160172297558373031280274728325371182960745794399112858232515128502224124"},{"team":"1. FC Köln","price":0.0005,"bid":null,"ask":0.001,"vol":66559,"vol24":0.0,"liq":37022,"wy":18.8,"wn":37607.0,"token":"69213248697227535253317455234417759710468150648599626150088945916641508522644"},{"team":"Union Berlin","price":0.0005,"bid":null,"ask":0.001,"vol":113266,"vol24":0.0,"liq":37911,"wy":19.17,"wn":38326.64,"token":"29738522262386424283430619359493947659173968481231802878540777442592353453704"},{"team":"Hamburger SV","price":0.0005,"bid":null,"ask":0.001,"vol":125716,"vol24":92.9,"liq":45241,"wy":18.95,"wn":37854.78,"token":"115431551137352447724925537753558248694874317408283903268633629548957472234423"},{"team":"SC Paderborn","price":0.0005,"bid":null,"ask":0.001,"vol":81130,"vol24":380.9,"liq":47322,"wy":18.97,"wn":37954.86,"token":"74175980169399091154511931541766638587985342100043014140394889292745337680989"},{"team":"SV Elversberg","price":0.0005,"bid":null,"ask":0.001,"vol":57543,"vol24":0.0,"liq":36800,"wy":18.79,"wn":37611.77,"token":"114031386739011955493421166642225259863896587923980952666485420990665119292742"}],"wallets":[{"name":"ebk.","usd":8936.35,"bet":"Bayern Munich"},{"name":"justme003","usd":7478.28,"bet":"Bayern Munich"},{"name":"KarlvonLupo","usd":2953.49,"bet":"Bayern Munich"},{"name":"Cyberflems","usd":2693.59,"bet":"Bayern Munich"},{"name":"winpleasee","usd":1973.11,"bet":"Borussia Dortmund"},{"name":"linlong","usd":1225.0,"bet":"Bayern Munich"},{"name":"SlaaneshChosen","usd":1182.43,"bet":"Bayern Munich"},{"name":"yoyobb2018","usd":1079.03,"bet":"Bayern Munich"},{"name":"frfr07","usd":1004.94,"bet":"Bayern Munich"},{"name":"lowrisk24","usd":969.64,"bet":"Bayern Munich"},{"name":"interisbest","usd":962.5,"bet":"Bayern Munich"},{"name":"StarMaster","usd":875.01,"bet":"Bayern Munich"},{"name":"1ncondition","usd":860.62,"bet":"Bayern Munich"},{"name":"Addey","usd":843.17,"bet":"Bayern Munich"},{"name":"tnl","usd":596.34,"bet":"Bayern Munich"}]},"Ligue 1":{"slug":"ligue-1-2027-champion-20260701201053335","title":"Ligue 1: 2027 Champion","volTotal":941911,"vol24":14809,"liq":1440180,"teams":[{"team":"Paris Saint-Germain","price":0.905,"bid":0.9,"ask":0.91,"vol":191619,"vol24":243.9,"liq":98688,"wy":46015.19,"wn":4830.29,"token":"92246328562240089384474835445688219606997651896071452249894684219516278032639"},{"team":"Monaco","price":0.0185,"bid":0.016,"ask":0.021,"vol":70499,"vol24":377.4,"liq":109411,"wy":569.19,"wn":30198.56,"token":"68022606150256612327723311981264487199379510793613285924738094425744344697470"},{"team":"Lille","price":0.0165,"bid":0.013,"ask":0.02,"vol":56348,"vol24":7270.9,"liq":91952,"wy":510.08,"wn":30402.22,"token":"45113645900771614863952524328702158026441239546240780003726220935301494690202"},{"team":"Marseille","price":0.015,"bid":0.01,"ask":0.02,"vol":96925,"vol24":94.0,"liq":112938,"wy":466.03,"wn":30604.46,"token":"111414369217978002701181448591112928179901290825913578662245737585282516204677"},{"team":"Lyon","price":0.0115,"bid":0.011,"ask":0.012,"vol":65047,"vol24":112.6,"liq":109077,"wy":356.73,"wn":30660.26,"token":"97298280955830781930306546689850651479127393879840789274828458481987817438399"},{"team":"Paris FC","price":0.0085,"bid":0.007,"ask":0.01,"vol":61865,"vol24":0.0,"liq":91877,"wy":261.38,"wn":30490.52,"token":"100765064011562894589490437761615822647267588727738521153915012235454617282817"},{"team":"Rennes","price":0.0075,"bid":0.007,"ask":0.008,"vol":61902,"vol24":0.0,"liq":111039,"wy":230.86,"wn":30551.19,"token":"17901750066308462811029638851439834476861007510493453327586391587499915476797"},{"team":"Lens","price":0.0055,"bid":0.004,"ask":0.007,"vol":92416,"vol24":0.0,"liq":108002,"wy":168.99,"wn":30552.82,"token":"53692415240243930993637371471330614755162126860505562559360809856726756936906"},{"team":"Strasbourg","price":0.0015,"bid":0.001,"ask":0.002,"vol":86141,"vol24":6567.1,"liq":88198,"wy":45.98,"wn":30613.19,"token":"1061905306519699666758052716575076929702396679094133516420345803999168244385"},{"team":"Toulouse","price":0.0015,"bid":0.001,"ask":0.002,"vol":53817,"vol24":142.6,"liq":71623,"wy":45.96,"wn":30594.51,"token":"79562257424223626252711416561801422831303122005844079836764737262525493642508"},{"team":"Angers","price":0.0005,"bid":null,"ask":0.001,"vol":21056,"vol24":0.0,"liq":44081,"wy":15.33,"wn":30625.15,"token":"87476767883187735824313822930287143528414294910247172313409220674537453096062"},{"team":"Auxerre","price":0.0005,"bid":null,"ask":0.001,"vol":3272,"vol24":0.0,"liq":57500,"wy":15.33,"wn":30625.15,"token":"102809639826831431283157974035458515748081891657717478370218340250458092238265"},{"team":"Brest","price":0.0005,"bid":null,"ask":0.001,"vol":5234,"vol24":0.0,"liq":59051,"wy":15.29,"wn":30625.15,"token":"52617815552525244225819332497849668136567168875783859064171891466048727460253"},{"team":"Le Havre","price":0.0005,"bid":null,"ask":0.001,"vol":3208,"vol24":0.0,"liq":57737,"wy":15.33,"wn":30625.15,"token":"89400598676348395968871441036370476540350123134317468617788035007147112284285"},{"team":"Nice","price":0.0005,"bid":null,"ask":0.001,"vol":10653,"vol24":0.0,"liq":69652,"wy":15.34,"wn":30625.14,"token":"22334647282473264829185746791700890479985640657727359698395776473390442856265"},{"team":"Lorient","price":0.0005,"bid":null,"ask":0.001,"vol":44734,"vol24":0.0,"liq":46651,"wy":15.34,"wn":30625.14,"token":"88181970015957633988756045921741183980717239955474584622736995522729436653933"},{"team":"Troyes","price":0.0005,"bid":null,"ask":0.001,"vol":13071,"vol24":0.0,"liq":56350,"wy":15.33,"wn":30625.15,"token":"23305228581941653957127993587091787032487479790296980346318534524303536573587"},{"team":"Le Mans","price":0.0005,"bid":null,"ask":0.001,"vol":4104,"vol24":0.0,"liq":56716,"wy":15.34,"wn":30625.14,"token":"44652850406772454871549054778118419742530660535920754203573161627443782206242"}],"wallets":[{"name":"Ldnhp","usd":23242.65,"bet":"Paris Saint-Germain"},{"name":"Bettingcryptofr","usd":3620.0,"bet":"Paris Saint-Germain"},{"name":"SlaaneshChosen","usd":2906.58,"bet":"Paris Saint-Germain"},{"name":"TheyAreTakingTheHobitsToIsengard","usd":2714.99,"bet":"Paris Saint-Germain"},{"name":"Cyberflems","usd":2698.97,"bet":"Paris Saint-Germain"},{"name":"leqso0410","usd":1675.76,"bet":"Paris Saint-Germain"},{"name":"william835","usd":1448.0,"bet":"Paris Saint-Germain"},{"name":"TimeTraveler","usd":1349.23,"bet":"Lille"},{"name":"frfr07","usd":989.5,"bet":"Paris Saint-Germain"},{"name":"yoyobb2018","usd":910.94,"bet":"Paris Saint-Germain"},{"name":"cigarettes","usd":697.44,"bet":"Paris Saint-Germain"},{"name":"marco415","usd":692.79,"bet":"Paris Saint-Germain"},{"name":"MemeDream","usd":543.0,"bet":"Paris Saint-Germain"},{"name":"whyboy007","usd":520.11,"bet":"Paris Saint-Germain"},{"name":"maraya","usd":514.39,"bet":"Paris Saint-Germain"}]}}};
+
+/* ================= utilidades ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const ORDER = ["La Liga","Premier League","Serie A","Bundesliga","Ligue 1"];
+const FLAG  = {"La Liga":"🇪🇸","Premier League":"🇬🇧","Serie A":"🇮🇹","Bundesliga":"🇩🇪","Ligue 1":"🇫🇷"};
+const EMBED = new URLSearchParams(location.search).get('embed')==='1' || location.hash==='#embed';
+if (EMBED) document.body.classList.add('embed');
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function money(n){
+  n = Math.round(n);
+  if (n >= 1e9) return (n/1e9).toLocaleString('es-ES',{maximumFractionDigits:2}) + ' mM US$';
+  if (n >= 1e6) return (n/1e6).toLocaleString('es-ES',{maximumFractionDigits:2}) + ' M US$';
+  if (n >= 1e3) return (n/1e3).toLocaleString('es-ES',{maximumFractionDigits:1}) + ' K US$';
+  return n.toLocaleString('es-ES') + ' US$';
+}
+function pctv(v){
+  const d = v < 2 ? 2 : 1;
+  return v.toLocaleString('es-ES',{minimumFractionDigits:d, maximumFractionDigits:d}) + '%';
+}
+function pctf(p){ return pctv(p*100); }
+function cents(p, live){
+  const v = p*100, d = v < 2 ? 2 : 1;
+  return v.toLocaleString('es-ES',{minimumFractionDigits:d, maximumFractionDigits:d}) + '¢' + (live ? ' <span class="dot on" style="width:7px;height:7px"></span>' : '');
+}
+function pp(v){ return (v>0?'+':'') + v.toLocaleString('es-ES',{maximumFractionDigits:1}) + ' pp'; }
+function cd(ms){
+  if (ms <= 0) return 'en marcha';
+  const s = Math.floor(ms/1000), d = Math.floor(s/86400), h = Math.floor(s%86400/3600), m = Math.floor(s%3600/60), ss = s%60;
+  if (d) return d + 'd ' + h + 'h';
+  if (h) return h + 'h ' + m + 'm';
+  return m + 'm ' + String(ss).padStart(2,'0') + 's';
+}
+function dtf(ts){ return new Date(ts).toLocaleString('es-ES',{weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function load(k, dflt){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : dflt; }catch(e){ return dflt; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function postToParent(obj){ try{ if (window.parent && window.parent !== window) window.parent.postMessage(Object.assign({source:'pm-smart-money'}, obj), '*'); }catch(e){} }
+
+/* ================= cálculos por liga ================= */
+const CACHE = {};
+function enr(name){
+  if (CACHE[name]) return CACHE[name];
+  const lg = DATA.leagues[name];
+  const total = lg.teams.reduce((a,t)=>a+t.wy, 0);
+  const teams = lg.teams
+    .map(t => Object.assign({}, t, { share: total ? t.wy/total*100 : 0, div: total ? t.wy/total*100 - t.price*100 : 0 }))
+    .sort((a,b) => b.share - a.share);
+  const lead = teams[0], second = teams[1] || teams[0];
+  const conviction = Math.max(0, Math.min(100, Math.round(0.6*lead.share + 0.4*Math.min(100, Math.abs(lead.div)*3))));
+  let verdict;
+  if (lead.div >= 5)       verdict = { cls:'ok',     text:'🔥 Las ballenas están MÁS convencidas que el mercado (' + pp(lead.div) + ' de sobreponderación en ' + lead.team + ')' };
+  else if (lead.div <= -5) verdict = { cls:'warn',   text:'⚠️ Las ballenas están MENOS convencidas que el precio (' + pp(lead.div) + ' en ' + lead.team + ')' };
+  else                     verdict = { cls:'neutral',text:'✔️ El capital fuerte está alineado con el precio de mercado (' + pp(lead.div) + ')' };
+  return CACHE[name] = { lg, total, teams, lead, second, conviction, verdict };
+}
+function livePrice(name, team, snap){
+  const holder = LIVE.prices[name];
+  const lp = holder ? holder[team] : undefined;
+  return (lp !== undefined && lp !== null) ? { p: lp, live:true } : { p: snap, live:false };
+}
+
+/* ================= modo en vivo (CLOB) ================= */
+const LIVE = { online:false, prices:{}, lastSync:null, attempts:0, flowSeen:new Set() };
+async function fetchMid(token){
+  const ctl = new AbortController(); const to = setTimeout(()=>ctl.abort(), 8000);
+  try{
+    const r = await fetch('https://clob.polymarket.com/midpoint?token_id=' + token, { signal: ctl.signal });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const j = await r.json();
+    const v = parseFloat(j.mid);
+    if (!(v >= 0 && v <= 1)) throw new Error('bad mid');
+    return v;
+  } finally { clearTimeout(to); }
+}
+async function poll(){
+  LIVE.attempts++;
+  const jobs = [];
+  for (const name of ORDER){
+    const lg = DATA.leagues[name];
+    const top = [...lg.teams].sort((a,b)=>b.price-a.price).slice(0,3);
+    for (const t of top){
+      jobs.push(fetchMid(t.token).then(mid => {
+        (LIVE.prices[name] = LIVE.prices[name] || {})[t.team] = mid;
+        return { name, team:t.team, mid, snap:t.price };
+      }).catch(()=>null));
+    }
+  }
+  const res = (await Promise.allSettled(jobs)).map(r=>r.value).filter(Boolean);
+  if (res.length){
+    LIVE.online = true; LIVE.lastSync = new Date();
+    updateLiveChip(); renderLeague(active); renderOverview();
+    detectFlow(res);
+  } else {
+    LIVE.online = false; updateLiveChip();
+  }
+  if (LIVE.online || LIVE.attempts >= 3){ clearInterval(LIVE.timer); LIVE.timer = null; }
+}
+function detectFlow(res){
+  for (const r of res){
+    const delta = (r.mid - r.snap) * 100;
+    if (Math.abs(delta) >= 3){
+      const key = r.name + '|' + r.team + '|' + Math.sign(delta) + '|' + Math.round(Math.abs(delta)/5);
+      if (!LIVE.flowSeen.has(key)){
+        LIVE.flowSeen.add(key);
+        toast('info', '📈 <b>Movimiento en vivo:</b> ' + esc(r.team) + ' (' + esc(r.name) + ') ' +
+          cents(r.snap) .replace(/<[^>]+>/g,'') + ' → ' + cents(r.mid).replace(/<[^>]+>/g,'') + ' (' + pp(delta) + ')');
+        postToParent({ type:'PM_SMART_FLOW', league:r.name, team:r.team, fromCents:r.snap*100, toCents:r.mid*100, deltaPp:delta });
+      }
+    }
+  }
+}
+function updateLiveChip(){
+  const chip = $('#liveChip'), dot = $('#liveDot'), txt = $('#liveTxt');
+  if (LIVE.online){
+    dot.classList.add('on');
+    txt.textContent = 'En vivo · CLOB Polymarket (precios de favoritos)';
+    chip.className = 'chip ok';
+    $('#lastSync').textContent = 'Última sincronización: ' + LIVE.lastSync.toLocaleTimeString('es-ES');
+  } else {
+    dot.classList.remove('on');
+    chip.className = 'chip';
+    txt.textContent = LIVE.attempts ? 'Sin conexión en vivo · usando instantánea embebida del ' + DATA.snapshot : 'Comprobando conexión en vivo…';
+    $('#lastSync').textContent = '';
+  }
+}
+
+/* ================= render ================= */
+let active = ORDER[0];
+
+function renderStatic(){
+  $('#lblSeason').textContent = DATA.season;
+  $('#lblSnap').textContent = DATA.snapshot;
+  $('#lblSeason2').textContent = DATA.season;
+  $('#lblSnap2').textContent = DATA.snapshot;
+  $('#lblSnap3').textContent = DATA.snapshot;
+  $('#lblSeason3').textContent = DATA.season;
+  const sel = $('#fLeague');
+  if (sel) sel.innerHTML = ORDER.map(n => '<option value="' + n + '">' + FLAG[n] + ' ' + n + '</option>').join('');
+}
+
+function renderOverview(){
+  $('#overview').innerHTML = ORDER.map(n => {
+    const E = enr(n);
+    const lp = livePrice(n, E.lead.team, E.lead.price);
+    return '<div class="ovcard' + (n===active?' active':'') + '" data-lg="' + esc(n) + '" role="button" tabindex="0">' +
+      '<div class="lg">' + FLAG[n] + ' ' + esc(n) + '</div>' +
+      '<div class="team" style="color:var(--pur)">' + esc(E.lead.team) + '</div>' +
+      '<div class="mut" style="font-size:13px">Capital ballena: <b style="color:var(--txt)">' + pctv(E.lead.share) + '</b> · Precio: <b style="color:var(--txt)">' + pctf(lp.p) + '</b></div>' +
+      '<div class="mut" style="font-size:12.5px;margin-top:3px">Div.: ' + pp(E.lead.div) + ' · Convicción: ' + E.conviction + '/100</div>' +
+      '</div>';
+  }).join('');
+  $$('#overview .ovcard').forEach(c => {
+    const go = () => selectLeague(c.dataset.lg);
+    c.addEventListener('click', go);
+    c.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+  });
+}
+
+function selectLeague(name){
+  active = name;
+  renderLeague(name);
+  renderOverview();
+  const lv = $('#leagueView');
+  if (EMBED) return;
+  lv.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function renderLeague(name){
+  const E = enr(name), lg = E.lg;
+  $('#lgTitle').textContent = FLAG[name] + ' ' + name + ' — ' + lg.title;
+  $('#lgSlug').textContent = 'Mercado: ' + lg.slug;
+  $('#lgLink').href = 'https://polymarket.com/event/' + lg.slug;
+  $('#lgKpis').innerHTML = [
+    ['Volumen total', money(lg.volTotal)],
+    ['Volumen 24 h', money(lg.vol24)],
+    ['Liquidez', money(lg.liq)],
+    ['Capital ballena YES', money(E.total)],
+    ['Equipos', lg.teams.length]
+  ].map(k => '<div class="card kpi"><div class="lab">' + k[0] + '</div><div class="val">' + k[1] + '</div></div>').join('');
+
+  const lp = livePrice(name, E.lead.team, E.lead.price);
+  $('#dirCard').innerHTML =
+    '<h3 style="color:var(--pur)">Dirección del dinero fuerte</h3>' +
+    '<div class="big">🐋 ' + esc(E.lead.team) + '</div>' +
+    '<div class="chips">' +
+      '<span class="chip pur">Concentración ballena: ' + E.lead.share.toLocaleString('es-ES',{maximumFractionDigits:1}) + '%</span>' +
+      '<span class="chip sky">Precio actual: ' + cents(lp.p, lp.live) + '</span>' +
+      '<span class="chip ' + (E.lead.div>=5?'ok':E.lead.div<=-5?'bad':'') + '">Divergencia: ' + pp(E.lead.div) + '</span>' +
+      '<span class="chip">Convicción: ' + E.conviction + '/100</span>' +
+      '<span class="chip">2ª posición: ' + esc(E.second.team) + ' (' + E.second.share.toLocaleString('es-ES',{maximumFractionDigits:1}) + '%)</span>' +
+    '</div>' +
+    '<div class="verdict ' + E.verdict.cls + '">' + E.verdict.text + '</div>' +
+    '<div class="note">Lectura: de ' + money(E.total) + ' de capital ballena YES en esta liga, ' + E.lead.share.toLocaleString('es-ES',{maximumFractionDigits:1}) + '% está sobre ' + esc(E.lead.team) + '. El resto de carteras grandes mantiene posiciones menores.' +
+      (E.lead.wn > 1000 && E.lead.price >= 0.5 ? ' Además hay ' + money(E.lead.wn) + ' en NO sobre ' + esc(E.lead.team) + ' (cobertura parcial de las mismas carteras).' : '') +
+    '</div>';
+
+  const top8 = E.teams.slice(0,8);
+  $('#bars').innerHTML = top8.map(t => {
+    const l2 = livePrice(name, t.team, t.price);
+    return '<div class="brow">' +
+      '<div class="blabel"><span><b>' + esc(t.team) + '</b></span><span class="bval">mercado ' + pctf(l2.p) + ' · ballenas ' + pctv(t.share) + '</span></div>' +
+      '<div class="btrack"><div class="bfill mkt" style="width:' + Math.min(100, l2.p*100) + '%"></div></div>' +
+      '<div class="btrack"><div class="bfill whl" style="width:' + Math.min(100, t.share) + '%"></div></div>' +
+      '</div>';
+  }).join('');
+
+  $('#tblTeams').innerHTML = '<table><thead><tr><th>Equipo</th><th>Precio YES</th><th>Capital ballena</th><th>% capital</th><th>Divergencia</th><th>Vol. 24 h</th></tr></thead><tbody>' +
+    [...lg.teams].sort((a,b)=>b.price-a.price).map(t => {
+      const e2 = E.teams.find(x=>x.team===t.team);
+      const l2 = livePrice(name, t.team, t.price);
+      const d = (l2.p - t.price) * 100;
+      return '<tr><td>' + esc(t.team) + (l2.live ? ' <span class="dot on" style="width:7px;height:7px"></span>' : '') + '</td>' +
+        '<td>' + pctf(l2.p) + (l2.live ? ' <span class="' + (d>=0?'up':'dn') + '">(' + pp(d) + ')</span>' : '') + '</td>' +
+        '<td>' + money(t.wy) + '</td><td>' + pctv(e2.share) + '</td>' +
+        '<td>' + pp(e2.div) + '</td><td>' + money(t.vol24) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+
+  $('#tblWallets').innerHTML = '<table><thead><tr><th>Cartera</th><th>Capital</th><th>Posición principal</th></tr></thead><tbody>' +
+    lg.wallets.map(w => '<tr><td>' + esc(w.name) + '</td><td>' + money(w.usd) + '</td><td>' + esc(w.bet) + '</td></tr>').join('') + '</tbody></table>';
+}
+
+/* ================= navegación ================= */
+$$('.nav .btn').forEach(b => b.addEventListener('click', () => {
+  $$('.nav .btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  ['panel','alerts','integr','method'].forEach(s => { $('#sec-' + s).style.display = (s===b.dataset.sec) ? '' : 'none'; });
+  window.scrollTo({ top:0, behavior:'smooth' });
+}));
+
+/* ================= toasts / notificaciones / sonido ================= */
+function toast(kind, html, ms){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind||'');
+  t.innerHTML = html;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{ t.style.opacity = '0'; t.style.transition = 'opacity .4s'; setTimeout(()=>t.remove(), 400); }, ms || 9000);
+}
+function beep(){
+  try{
+    const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+    const c = new C(), o = c.createOscillator(), g = c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.frequency.setValueAtTime(880, c.currentTime);
+    o.frequency.setValueAtTime(660, c.currentTime + 0.18);
+    g.gain.setValueAtTime(0.12, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.55);
+    o.start(); o.stop(c.currentTime + 0.55);
+  }catch(e){}
+}
+function notify(title, body){
+  try{ if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body: body }); }catch(e){}
+}
+
+/* ================= motor de eventos T-60 ================= */
+let events = load('pm_events_v1', []);
+let feed   = load('pm_feed_v1', []);
+
+function seedExamples(){
+  if (events.length) return;
+  const now = Date.now();
+  events = [
+    { id:uid(), league:'Premier League', title:'EJEMPLO · Partido del sábado (edita este evento)', ts: now + 30*60e3,      fired:false, example:true },
+    { id:uid(), league:'La Liga',        title:'EJEMPLO · Partido a media semana (edita este evento)', ts: now + 26*3600e3,   fired:false, example:true },
+    { id:uid(), league:'Bundesliga',     title:'EJEMPLO · Jornada del fin de semana (edita este evento)', ts: now + 3*86400e3, fired:false, example:true }
+  ];
+  save('pm_events_v1', events);
+}
+
+function fireAlert(e, isDemo){
+  const E = enr(e.league);
+  const lp = livePrice(e.league, E.lead.team, E.lead.price);
+  const msg = 'T-60 · ' + e.league + ': el dinero fuerte va hacia ' + E.lead.team +
+    ' (' + pctv(E.lead.share) + ' del capital ballena · precio ' + pctf(lp.p) + ')';
+  if (!isDemo){
+    e.fired = true; save('pm_events_v1', events);
+  }
+  feed.unshift({ t: Date.now(), league: e.league, event: e.title, msg: msg, demo: !!isDemo });
+  feed = feed.slice(0, 50); save('pm_feed_v1', feed);
+  toast('', '🚨 <b>Alerta T-60</b> · ' + esc(msg) + '<br><span class="mut" style="font-size:12px">' + esc(e.title) + ' · inicio ' + dtf(e.ts) + '</span>', 12000);
+  notify('🚨 Alerta T-60 · ' + e.league, msg + ' — ' + e.title);
+  beep();
+  postToParent({ type:'PM_SMART_ALERT', league:e.league, event:e.title, team:E.lead.team,
+    sharePct:E.lead.share, priceCents:lp.p*100, kickoffISO:new Date(e.ts).toISOString(), msg:msg });
+  renderFeed();
+}
+
+function renderEvents(){
+  const now = Date.now();
+  const list = [...events].sort((a,b)=>a.ts-b.ts);
+  const el = $('#evList');
+  if (el) el.innerHTML = list.length ? list.map(e => {
+    const dt = e.ts - now;
+    let badge = '<span class="chip">⏳ Programado · faltan ' + cd(dt) + '</span>';
+    if (dt <= -2*3600e3) badge = '<span class="chip">✔️ Finalizado</span>';
+    else if (dt <= 0) badge = '<span class="chip pur">🔴 En marcha</span>';
+    else if (dt <= 3600e3) badge = '<span class="chip warn">🚨 Ventana T-60 · ' + (e.fired ? 'alerta enviada' : 'disparando…') + '</span>';
+    return '<div class="evrow"><div class="meta"><div class="t">' + (e.example ? '🏷️ ' : '🏟️ ') + esc(e.title) + '</div>' +
+      '<div class="d">' + FLAG[e.league] + ' ' + esc(e.league) + ' · inicio ' + dtf(e.ts) + '</div></div>' +
+      badge + '<button class="btn mini" data-del="' + e.id + '">🗑️ Quitar</button></div>';
+  }).join('') : '<p class="mut">No hay eventos. Añade el próximo partido de tu página de apuestas con el formulario de arriba.</p>';
+  $$('#evList [data-del]').forEach(b => b.addEventListener('click', () => {
+    events = events.filter(x => x.id !== b.dataset.del); save('pm_events_v1', events); renderEvents(); renderNextWidget();
+  }));
+  const nxt = list.find(e => e.ts > now);
+  $('#nextChip').textContent = nxt ? ('Próxima alerta: ' + cd(nxt.ts - now) + ' · ' + nxt.title) : 'Sin eventos programados';
+}
+function renderNextWidget(){
+  const now = Date.now();
+  const list = [...events].sort((a,b)=>a.ts-b.ts);
+  const nxt = list.find(e => e.ts > now);
+  $('#wNext').innerHTML = nxt
+    ? '<b style="color:var(--warn)">' + cd(nxt.ts - now) + '</b> para «' + esc(nxt.title) + '» (' + FLAG[nxt.league] + ' ' + esc(nxt.league) + ') · inicio ' + dtf(nxt.ts)
+    : 'Sin eventos programados';
+}
+function renderFeed(){
+  const mk = arr => arr.length
+    ? arr.slice(0,10).map(f => '<li><span class="ft">' + dtf(f.t) + (f.demo ? ' · DEMO' : '') + ' · ' + esc(f.league) + '</span><br>' + esc(f.msg) + '</li>').join('')
+    : '<li style="border-left-color:var(--mut)">Todavía no se ha disparado ninguna alerta.</li>';
+  const a = $('#feedList'), b = $('#feedList2');
+  if (a) a.innerHTML = mk(feed);
+  if (b) b.innerHTML = mk(feed);
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const e of events){
+    const dt = e.ts - now;
+    if (!e.fired && dt <= 3600e3 && dt > 0) fireAlert(e, false);
+  }
+  renderEvents(); renderNextWidget();
+}, 1000);
+
+/* ================= formularios y botones ================= */
+const btnAdd = $('#btnAdd');
+if (btnAdd) btnAdd.addEventListener('click', () => {
+  const league = $('#fLeague').value;
+  const title = $('#fTitle').value.trim() || ('Partido de ' + league);
+  const ts = $('#fTs').value ? Date.parse($('#fTs').value) : 0;
+  if (!ts){ toast('info', '⚠️ <b>Falta la fecha y hora</b> del evento.'); return; }
+  events.push({ id:uid(), league, title, ts, fired:false, example:false });
+  save('pm_events_v1', events);
+  $('#fTitle').value = ''; $('#fTs').value = '';
+  renderEvents(); renderNextWidget();
+  toast('info', '✅ <b>Evento programado.</b> Recibirás la alerta T-60 automáticamente.');
+});
+const btnPerm = $('#btnPerm');
+if (btnPerm) btnPerm.addEventListener('click', async () => {
+  if (!('Notification' in window)){ toast('info','⚠️ Este navegador no soporta notificaciones (las alertas en pantalla y postMessage funcionan igual).'); return; }
+  const p = await Notification.requestPermission();
+  btnPerm.textContent = p === 'granted' ? '🔔 Notificaciones activadas' : '🔕 Notificaciones bloqueadas';
+});
+const btnDemo = $('#btnDemo'), btnDemo2 = $('#btnDemo2');
+if (btnDemo)  btnDemo.addEventListener('click', () => fireAlert({ league: active, title:'DEMO · Prueba del motor T-60 (no es un evento real)', ts: Date.now() + 3600e3 }, true));
+if (btnDemo2) btnDemo2.addEventListener('click', () => fireAlert({ league: active, title:'DEMO · Prueba del motor T-60 (no es un evento real)', ts: Date.now() + 3600e3 }, true));
+const btnClean = $('#btnClean');
+if (btnClean) btnClean.addEventListener('click', () => {
+  events = events.filter(e => !e.example); save('pm_events_v1', events);
+  renderEvents(); renderNextWidget();
+  toast('info', '🧹 <b>Ejemplos eliminados.</b> Programa tus eventos reales.');
+});
+$('#btnRetry').addEventListener('click', () => { LIVE.attempts = 0; if (!LIVE.timer) LIVE.timer = setInterval(poll, 60000); updateLiveChip(); poll(); });
+
+$$('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+  const txt = document.getElementById(b.dataset.copy).textContent;
+  try{ await navigator.clipboard.writeText(txt); }
+  catch(e){
+    const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
+    ta.select(); try{ document.execCommand('copy'); }catch(_){} ta.remove();
+  }
+  b.textContent = '✅ Copiado'; setTimeout(()=>{ b.textContent = '📋 Copiar'; }, 1800);
+}));
+
+/* ================= mensajes de la página anfitriona ================= */
+window.addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.source !== 'pm-smart-money') return;
+  if (d.type === 'PM_SMART_READY' || d.type === 'PM_SMART_SET_LEAGUE'){
+    if (d.league && ORDER.includes(d.league)) selectLeague(d.league);
+    sendState();
+  }
+});
+function sendState(){
+  postToParent({ type:'PM_SMART_STATE', snapshot: DATA.snapshot, season: DATA.season,
+    leagues: ORDER.map(n => { const E = enr(n);
+      return { league:n, leader:E.lead.team, sharePct:E.lead.share, priceCents:E.lead.price*100, divPp:E.lead.div, conviction:E.conviction, volTotal:DATA.leagues[n].volTotal, whaleTotal:E.total };
+    }) });
+}
+
+/* ================= arranque ================= */
+renderStatic();
+seedExamples();
+renderOverview();
+renderLeague(active);
+renderEvents();
+renderNextWidget();
+renderFeed();
+updateLiveChip();
+sendState();
+poll();
+LIVE.timer = setInterval(poll, 60000);
+
+/* ===================== SMART MONEY T-60min ALERT BANNER ===================== */
+/* Banner sticky superior que muestra el próximo evento Polymarket y hacia dónde
+   se mueve el dinero inteligente (concentración ballena). Reutiliza el array `events`
+   global y la lógica de fireAlert existente. Se actualiza cada segundo. */
+(function smartMoneyBannerPM() {
+  function render() {
+    const banner = document.getElementById('smAlertBanner');
+    if (!banner) return;
+    const now = Date.now();
+    const list = (typeof events !== 'undefined' ? events : []).slice().sort((a,b) => a.ts - b.ts);
+    const next = list.find(e => e.ts > now);
+
+    const iconEl = document.getElementById('smAlertIcon');
+    const stateEl = document.getElementById('smAlertState');
+    const eventEl = document.getElementById('smAlertEvent');
+    const dirEl = document.getElementById('smAlertDirection');
+    const cdEl = document.getElementById('smAlertCountdown');
+    const cdLabelEl = document.getElementById('smAlertCountdownLabel');
+
+    if (!next) {
+      banner.className = 'sm-alert empty';
+      iconEl.textContent = '📡';
+      stateEl.textContent = 'EN ESPERA';
+      eventEl.textContent = 'No hay eventos próximos programados';
+      dirEl.innerHTML = 'Añade el próximo partido desde el formulario de arriba para activar la alerta <b>T-60</b>.';
+      cdEl.textContent = '—';
+      cdLabelEl.textContent = 'sin eventos';
+      return;
+    }
+
+    const dt = next.ts - now;
+    const FLAG = (typeof window.FLAG !== 'undefined') ? window.FLAG : {};
+    const flag = FLAG[next.league] || '';
+    const fmtDT = new Date(next.ts).toLocaleString('es-ES', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+
+    // Dirección del smart money: equipo con mayor share (si hay snapshot)
+    let dirHtml = 'Analizando concentración ballena en Polymarket…';
+    try {
+      const E = (typeof getLeagueEvent === 'function') ? getLeagueEvent(next.league) : null;
+      if (E && E.lead) {
+        dirHtml = `<span class="arrow">↗ Smart Money</span> hacia <b>${E.lead.team}</b> · concentración ballena <b>${E.lead.share.toFixed(1)}%</b> · capital total ${typeof money === 'function' ? money(E.total) : '—'}`;
+      } else {
+        dirHtml = `Próximo evento en <b>${next.league}</b>. La alerta T-60 mostrará hacia dónde se mueve el dinero ballena.`;
+      }
+    } catch(_) {}
+
+    let state, icon, cdLabel, cdValue;
+    if (dt <= 0 && dt > -2 * 3600e3) {
+      state = 'EN VIVO'; icon = '🔴'; cdValue = 'LIVE'; cdLabel = 'en juego';
+      banner.className = 'sm-alert live';
+    } else if (dt <= 3600e3 && dt > 0) {
+      state = 'T-60 MIN'; icon = '🚨'; cdValue = (typeof cd === 'function' ? cd(dt) : Math.floor(dt/60000) + ' min'); cdLabel = 'para el inicio';
+      banner.className = 'sm-alert t60';
+    } else {
+      state = 'PROGRAMADO'; icon = '⏳'; cdValue = (typeof cd === 'function' ? cd(dt) : Math.floor(dt/3600e3) + 'h'); cdLabel = 'para el inicio';
+      banner.className = 'sm-alert';
+    }
+
+    iconEl.textContent = icon;
+    stateEl.textContent = state;
+    eventEl.textContent = (next.title || 'Evento') + ' · ' + flag + ' ' + (next.league || '') + ' · ' + fmtDT;
+    dirEl.innerHTML = dirHtml;
+    cdEl.textContent = cdValue;
+    cdLabelEl.textContent = cdLabel;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else { render(); }
+  setInterval(render, 1000);
+})();
+</script>
+</body>
+</html>
